@@ -177,8 +177,9 @@ ANTHROPIC_API_KEY=sk-ant-xxxxx
 # BytePlus API Key（必須 - Byteflow機能）
 BYTEPLUS_API_KEY=bp_xxxxx
 
-# BytePlus API Endpoint
-BYTEPLUS_ENDPOINT=https://api.byteplus.com/v1
+# BytePlus API Endpoint (v3 base URL)
+# Client appends paths: /images/generations, /videos/generations, /chat/completions
+BYTEPLUS_ENDPOINT=https://ark.ap-southeast.bytepluses.com/api/v3
 ```
 
 ## Byteflow開発ガイドライン

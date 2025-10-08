@@ -140,7 +140,7 @@ Required environment variables:
 ```bash
 # BytePlus API (Required)
 BYTEPLUS_API_KEY=your_byteplus_api_key
-BYTEPLUS_ENDPOINT=https://ark.ap-southeast.bytepluses.com/api/v3/images/generations
+BYTEPLUS_ENDPOINT=https://ark.ap-southeast.bytepluses.com/api/v3
 
 # Anthropic API (Optional, for agents)
 ANTHROPIC_API_KEY=your_anthropic_api_key
