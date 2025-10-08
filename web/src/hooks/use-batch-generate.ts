@@ -44,7 +44,7 @@ export function useBatchGenerate() {
     successRate: number;
   } | null>(null);
   const { toast } = useToast();
-  const { addToHistory } = useAppStore();
+  const { addGeneration } = useAppStore();
 
   const batchGenerate = async (params: BatchGenerateRequest) => {
     setIsLoading(true);
@@ -64,14 +64,13 @@ export function useBatchGenerate() {
         result.successful.forEach((item: any) => {
           if (item.data && item.data.length > 0) {
             item.data.forEach((imgData: any) => {
-              addToHistory({
+              addGeneration({
                 type: 'image',
                 prompt: item.metadata?.prompt || 'Batch generation',
-                model: params.sharedParams.model || 'seedream-4-0-250828',
-                result: {
-                  url: imgData.url,
-                },
-                params: {
+                model: (params.sharedParams.model || 'seedream-4-0-250828') as any,
+                url: imgData.url,
+                revisedPrompt: imgData.revised_prompt,
+                metadata: {
                   size: params.sharedParams.size,
                   watermark: params.sharedParams.watermark,
                   seed: params.sharedParams.seed,

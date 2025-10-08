@@ -32,7 +32,7 @@ export function useEditImage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { addToHistory } = useAppStore();
+  const { addGeneration } = useAppStore();
 
   const editImage = async (params: EditImageRequest) => {
     setIsLoading(true);
@@ -45,14 +45,13 @@ export function useEditImage() {
       // Add to history
       if (result.data && result.data.length > 0) {
         result.data.forEach((item: any) => {
-          addToHistory({
+          addGeneration({
             type: 'image',
             prompt: params.prompt,
-            model: 'Bytedance-SeedEdit-3.0-i2i',
-            result: {
-              url: item.url,
-            },
-            params: {
+            model: 'Bytedance-SeedEdit-3.0-i2i' as any,
+            url: item.url,
+            revisedPrompt: item.revised_prompt,
+            metadata: {
               originalImage: Array.isArray(params.image) ? params.image[0] : params.image,
               size: params.size,
               watermark: params.watermark,
