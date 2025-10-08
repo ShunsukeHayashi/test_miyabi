@@ -152,6 +152,7 @@ export const useGenerationStore = create<GenerationStore>()(
       name: 'byteflow-storage',
       version: 1,
       storage: createJSONStorage(() => localStorage),
+      skipHydration: true, // Fix hydration mismatch - hydrate on client only
       partialize: (state) => ({
         history: state.history,
         favorites: state.favorites,
