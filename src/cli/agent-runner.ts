@@ -7,6 +7,7 @@
  * @module cli/agent-runner
  */
 
+import 'dotenv/config';
 import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
@@ -26,17 +27,18 @@ interface RunnerOptions {
  */
 async function fetchIssue(issueNumber: number): Promise<Task> {
   // Placeholder - would use GitHub API
+  // For now, create a simple task that the CoordinatorAgent can process
   return {
     id: `issue-${issueNumber}`,
     title: `Issue #${issueNumber}`,
-    description: `Processing issue ${issueNumber}`,
-    type: 'feature',
-    priority: 'high',
-    complexity: 'medium',
+    description: `Autonomous processing of GitHub Issue #${issueNumber}`,
+    status: 'pending' as const,
+    priority: 'P1-High' as const,
+    complexity: 'medium' as const,
     assignedAgent: 'coordinator',
-    status: 'pending',
     dependencies: [],
-    estimatedTime: 7200000, // 2 hours in ms
+    estimatedHours: 2.0,
+    labels: ['type:feature', 'agent:coordinator'],
     metadata: {
       issueNumber,
       repository: process.env.GITHUB_REPO || 'test_miyabi',
@@ -124,8 +126,16 @@ program
   .option('--log-level <level>', 'Log level (debug, info, warn, error)', 'info')
   .action(async (options: RunnerOptions) => {
     try {
+      const anthropicApiKey = process.env.ANTHROPIC_API_KEY || 'mock-key-for-dry-run';
+      if (!process.env.ANTHROPIC_API_KEY && !options.dryRun) {
+        console.error(chalk.red('❌ Error: ANTHROPIC_API_KEY environment variable is required'));
+        console.error(chalk.yellow('   Tip: Use --dry-run flag to test without API key'));
+        process.exit(1);
+      }
+
       const config: AgentConfig = {
         name: 'CLI Runner',
+        anthropicApiKey,
         debug: options.logLevel === 'debug',
       };
 

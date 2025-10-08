@@ -1,23 +1,27 @@
 "use client"
 
 import { useState } from "react"
-import { Layers, Plus, X } from "lucide-react"
+import { Layers, Plus, X, Download, CheckCircle2, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useGenerate } from "@/hooks/use-generate"
+import { Switch } from "@/components/ui/switch"
+import { useBatchGenerate } from "@/hooks/use-batch-generate"
 import Image from "next/image"
+import JSZip from 'jszip'
+import { saveAs } from 'file-saver'
 
 export default function BatchPage() {
   const [prompts, setPrompts] = useState<string[]>([""])
   const [model, setModel] = useState("seedream-4-0-250828")
   const [size, setSize] = useState<"1K" | "2K" | "4K">("2K")
+  const [watermark, setWatermark] = useState(true)
+  const [maxConcurrency, setMaxConcurrency] = useState(3)
   const [generatedImages, setGeneratedImages] = useState<any[]>([])
-  const [progress, setProgress] = useState(0)
 
-  const { generateImage, isLoading } = useGenerate()
+  const { batchGenerate, isLoading, error, progress } = useBatchGenerate()
 
   const addPrompt = () => {
     setPrompts([...prompts, ""])
@@ -38,32 +42,52 @@ export default function BatchPage() {
     if (validPrompts.length === 0) return
 
     setGeneratedImages([])
-    setProgress(0)
 
-    const results: any[] = []
-
-    for (let i = 0; i < validPrompts.length; i++) {
-      try {
-        const result = await generateImage({
-          model,
-          prompt: validPrompts[i],
+    try {
+      const result = await batchGenerate({
+        prompts: validPrompts,
+        sharedParams: {
+          model: model as any,
           size,
-        })
+          watermark,
+        },
+        maxConcurrency,
+      })
 
-        if (result.data) {
-          results.push(...result.data.map((img: any) => ({
-            ...img,
-            prompt: validPrompts[i]
-          })))
-        }
+      // Flatten all successful results
+      const images = result.successful.flatMap((item: any) =>
+        item.data.map((img: any) => ({
+          ...img,
+          prompt: item.metadata?.prompt || 'Batch generation',
+        }))
+      )
 
-        setProgress(((i + 1) / validPrompts.length) * 100)
-      } catch (error) {
-        console.error(`Failed to generate for prompt ${i}:`, error)
+      setGeneratedImages(images)
+    } catch (err) {
+      console.error('Batch generation failed:', err)
+    }
+  }
+
+  const handleBulkDownload = async () => {
+    if (generatedImages.length === 0) return
+
+    const zip = new JSZip()
+
+    // Fetch each image and add to zip
+    for (let i = 0; i < generatedImages.length; i++) {
+      const img = generatedImages[i]
+      try {
+        const response = await fetch(img.url)
+        const blob = await response.blob()
+        zip.file(`image-${i + 1}.png`, blob)
+      } catch (err) {
+        console.error(`Failed to download image ${i + 1}:`, err)
       }
     }
 
-    setGeneratedImages(results)
+    // Generate and download zip file
+    const content = await zip.generateAsync({ type: 'blob' })
+    saveAs(content, `batch-images-${Date.now()}.zip`)
   }
 
   return (
@@ -156,19 +180,59 @@ export default function BatchPage() {
               </Select>
             </div>
 
+            {/* Watermark Toggle */}
+            <div className="flex items-center justify-between">
+              <Label>Watermark</Label>
+              <Switch checked={watermark} onCheckedChange={setWatermark} />
+            </div>
+
+            {/* Concurrency Setting */}
+            <div className="space-y-2">
+              <Label htmlFor="concurrency">
+                Parallel Jobs: {maxConcurrency}
+              </Label>
+              <Select value={maxConcurrency.toString()} onValueChange={(v) => setMaxConcurrency(parseInt(v))}>
+                <SelectTrigger id="concurrency">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 (Sequential)</SelectItem>
+                  <SelectItem value="3">3 (Recommended)</SelectItem>
+                  <SelectItem value="5">5 (Fast)</SelectItem>
+                  <SelectItem value="10">10 (Maximum)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Higher values = faster but may hit rate limits
+              </p>
+            </div>
+
             {/* Progress */}
-            {isLoading && progress > 0 && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Progress</span>
-                  <span>{Math.round(progress)}%</span>
+            {isLoading && progress && (
+              <Card className="p-4 bg-primary/5">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Progress: {progress.completed} / {progress.total}</span>
+                    <span>{Math.round((progress.completed / progress.total) * 100)}%</span>
+                  </div>
+                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary transition-all duration-300"
+                      style={{ width: `${(progress.completed / progress.total) * 100}%` }}
+                    />
+                  </div>
+                  {progress.successRate > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      Success Rate: {Math.round(progress.successRate * 100)}%
+                    </p>
+                  )}
                 </div>
-                <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
+              </Card>
+            )}
+
+            {error && (
+              <div className="p-4 bg-destructive/10 text-destructive rounded-lg text-sm">
+                {error}
               </div>
             )}
 
@@ -194,35 +258,46 @@ export default function BatchPage() {
           </CardContent>
         </Card>
 
-        {/* Generated Images */}
+        {/* Generated Images with Masonry Grid */}
         {generatedImages.length > 0 && (
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle>Generated Images</CardTitle>
-              <CardDescription>
-                {generatedImages.length} images generated
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {generatedImages.map((img, idx) => (
-                  <div key={idx} className="space-y-2">
-                    <div className="relative aspect-square rounded-lg overflow-hidden border">
+          <div className="mt-8 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Generated Images</h2>
+                <p className="text-sm text-muted-foreground">
+                  {generatedImages.length} images generated
+                </p>
+              </div>
+              <Button onClick={handleBulkDownload} variant="default">
+                <Download className="mr-2 h-4 w-4" />
+                Download All ({generatedImages.length})
+              </Button>
+            </div>
+
+            {/* Masonry Grid Layout */}
+            <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+              {generatedImages.map((img, idx) => (
+                <div key={idx} className="break-inside-avoid">
+                  <Card className="overflow-hidden">
+                    <div className="relative w-full">
                       <Image
                         src={img.url}
                         alt={`Generated image ${idx + 1}`}
-                        fill
-                        className="object-cover"
+                        width={500}
+                        height={500}
+                        className="w-full h-auto object-cover"
                       />
                     </div>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {img.prompt}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                    <CardContent className="p-3">
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {img.prompt}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </div>
