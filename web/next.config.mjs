@@ -6,6 +6,8 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+
+  // Performance: Image Optimization
   images: {
     remotePatterns: [
       // BytePlus CDN domains
@@ -33,7 +35,19 @@ const nextConfig = {
     ],
     formats: ['image/webp', 'image/avif'],
   },
-  // Enable experimental features for better performance
+
+  // Performance: Compression
+  compress: true, // Enable gzip compression
+
+  // Performance: Production Optimizations
+  productionBrowserSourceMaps: false, // Disable source maps in production for smaller bundles
+  poweredByHeader: false, // Remove X-Powered-By header for security
+
+  // Performance: React optimizations
+  reactStrictMode: true,
+  swcMinify: true, // Use SWC for faster minification
+
+  // Performance: Package optimization
   experimental: {
     optimizePackageImports: ['@/lib', '@/components', 'lucide-react', '@radix-ui/react-icons'],
   },
