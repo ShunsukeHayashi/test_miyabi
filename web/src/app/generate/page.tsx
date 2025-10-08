@@ -8,6 +8,7 @@
 
 import { useState } from 'react';
 import { useGenerateImage } from '@/hooks/use-generate';
+import { useGenerationHistory } from '@/hooks/use-generation-history';
 import { PromptEditor } from '@/components/custom/prompt-editor';
 import { ModelSelector } from '@/components/custom/model-selector';
 import { ParameterControls } from '@/components/custom/parameter-controls';
@@ -16,6 +17,7 @@ import { ImagePreview } from '@/components/custom/image-preview';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Sparkles, Download, RefreshCw, Heart } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function GeneratePage() {
   const [prompt, setPrompt] = useState('');
@@ -27,6 +29,9 @@ export default function GeneratePage() {
   const [metadata, setMetadata] = useState<any>(null);
 
   const { generateImage, isLoading, error } = useGenerateImage();
+  const { toggleFavorite, favorites } = useGenerationHistory();
+
+  const isFavorite = metadata && favorites.some((fav) => fav.url === generatedImage);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -40,7 +45,6 @@ export default function GeneratePage() {
         size,
         watermark,
         seed,
-        response_format: 'url',
       });
 
       if (result.data && result.data.length > 0) {
@@ -71,9 +75,21 @@ export default function GeneratePage() {
     handleGenerate();
   };
 
+  const { toast } = useToast();
+
   const handleSaveToFavorites = () => {
-    // TODO: Implement favorites functionality
-    console.log('Save to favorites');
+    if (!metadata) return;
+
+    const historyItem = favorites.find((item) => item.url === generatedImage);
+    if (historyItem) {
+      toggleFavorite(historyItem.id);
+      toast({
+        title: isFavorite ? 'Removed from favorites' : 'Added to favorites',
+        description: isFavorite
+          ? 'Image removed from your favorites'
+          : 'Image saved to your favorites',
+      });
+    }
   };
 
   return (
@@ -185,8 +201,12 @@ export default function GeneratePage() {
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Regenerate
                 </Button>
-                <Button onClick={handleSaveToFavorites} variant="outline">
-                  <Heart className="h-4 w-4" />
+                <Button
+                  onClick={handleSaveToFavorites}
+                  variant="outline"
+                  className={isFavorite ? 'text-red-500' : ''}
+                >
+                  <Heart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
                 </Button>
               </div>
 
