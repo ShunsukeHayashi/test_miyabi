@@ -26,6 +26,18 @@ export function Header() {
               Generate
             </Link>
             <Link
+              href="/edit"
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              Edit
+            </Link>
+            <Link
+              href="/batch"
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              Batch
+            </Link>
+            <Link
               href="/history"
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >

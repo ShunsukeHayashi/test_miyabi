@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Sparkles } from "lucide-react"
+import { Sparkles, Wand2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -9,37 +9,41 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
-import { useToast } from "@/hooks/use-toast"
+import { useGenerate } from "@/hooks/use-generate"
+import { useAppStore } from "@/lib/store"
+import Image from "next/image"
 
 export default function Home() {
   const [prompt, setPrompt] = useState("")
   const [model, setModel] = useState("seedream-4-0-250828")
-  const [size, setSize] = useState("2K")
+  const [size, setSize] = useState<"1K" | "2K" | "4K">("2K")
   const [watermark, setWatermark] = useState(true)
   const [seed, setSeed] = useState([42])
-  const [loading, setLoading] = useState(false)
-  const { toast } = useToast()
+  const [generatedImages, setGeneratedImages] = useState<any[]>([])
 
-  const handleGenerate = () => {
+  const { generateImage, isLoading } = useGenerate()
+  const { settings } = useAppStore()
+
+  const handleGenerate = async () => {
     if (!prompt.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a prompt",
-        variant: "destructive",
-      })
       return
     }
 
-    setLoading(true)
-
-    // TODO: Integrate with BytePlusClient
-    setTimeout(() => {
-      toast({
-        title: "Success",
-        description: "Image generation started!",
+    try {
+      const result = await generateImage({
+        model,
+        prompt,
+        size,
+        watermark,
+        seed: seed[0],
       })
-      setLoading(false)
-    }, 2000)
+
+      if (result.data) {
+        setGeneratedImages(result.data)
+      }
+    } catch (error) {
+      console.error("Generation failed:", error)
+    }
   }
 
   return (
@@ -113,7 +117,7 @@ export default function Home() {
             {/* Size Selection */}
             <div className="space-y-2">
               <Label htmlFor="size">Image Size</Label>
-              <Select value={size} onValueChange={setSize}>
+              <Select value={size} onValueChange={(v: any) => setSize(v)}>
                 <SelectTrigger id="size">
                   <SelectValue />
                 </SelectTrigger>
@@ -162,11 +166,11 @@ export default function Home() {
             {/* Generate Button */}
             <Button
               onClick={handleGenerate}
-              disabled={loading}
+              disabled={isLoading}
               className="w-full"
               size="lg"
             >
-              {loading ? (
+              {isLoading ? (
                 <>
                   <Sparkles className="mr-2 h-4 w-4 animate-spin" />
                   Generating...
@@ -180,6 +184,32 @@ export default function Home() {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Generated Images */}
+        {generatedImages.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Generated Images</CardTitle>
+              <CardDescription>
+                Click on an image to view in full size
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {generatedImages.map((img, idx) => (
+                  <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border">
+                    <Image
+                      src={img.url}
+                      alt={`Generated image ${idx + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Info Section */}
         <div className="mt-8 text-center text-sm text-muted-foreground">
