@@ -32,6 +32,20 @@ export interface OptimizePromptRequest {
   style?: string;
 }
 
+export interface BatchGenerateRequest {
+  prompts: string[];
+  sharedParams: Partial<GenerateImageRequest>;
+  maxConcurrency?: number;
+}
+
+export interface EditImageRequest {
+  image: string | string[];
+  prompt: string;
+  size?: '1K' | '2K' | '4K';
+  watermark?: boolean;
+  seed?: number;
+}
+
 export class APIClient {
   private baseUrl: string;
 
@@ -68,6 +82,40 @@ export class APIClient {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error || 'Failed to generate video');
+    }
+
+    return response.json();
+  }
+
+  async batchGenerate(params: BatchGenerateRequest) {
+    const response = await fetch(`${this.baseUrl}/api/batch`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to batch generate images');
+    }
+
+    return response.json();
+  }
+
+  async editImage(params: EditImageRequest) {
+    const response = await fetch(`${this.baseUrl}/api/edit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to edit image');
     }
 
     return response.json();

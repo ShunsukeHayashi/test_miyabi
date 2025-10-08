@@ -189,6 +189,7 @@ export class BytePlusClient {
             Authorization: `Bearer ${this.config.apiKey}`,
             'Content-Type': 'application/json',
             'User-Agent': 'Byteflow/1.0',
+            'x-is-encrypted': 'true',
           },
           body: body ? JSON.stringify(body) : undefined,
           signal: controller.signal,
@@ -334,7 +335,7 @@ export class BytePlusClient {
     if (request.seed !== undefined) requestBody.seed = request.seed;
 
     const response = await this.makeRequest<ImageGenerationResponse>(
-      '',
+      '/images/generations',
       'POST',
       requestBody
     );

@@ -44,8 +44,8 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             <Select
-              value={settings.defaultModel}
-              onValueChange={(value) => updateSettings({ defaultModel: value })}
+              value={settings.defaultImageModel}
+              onValueChange={(value: any) => updateSettings({ defaultImageModel: value })}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -75,8 +75,8 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             <Select
-              value={settings.defaultSize}
-              onValueChange={(value: any) => updateSettings({ defaultSize: value })}
+              value={settings.defaultImageSize}
+              onValueChange={(value: any) => updateSettings({ defaultImageSize: value })}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -123,11 +123,11 @@ export default function SettingsPage() {
               <Label htmlFor="optimize">Enable prompt optimization</Label>
               <Switch
                 id="optimize"
-                checked={settings.enablePromptOptimization}
-                onCheckedChange={(checked) => updateSettings({ enablePromptOptimization: checked })}
+                checked={settings.autoOptimizePrompts}
+                onCheckedChange={(checked) => updateSettings({ autoOptimizePrompts: checked })}
               />
             </div>
-            {settings.enablePromptOptimization && (
+            {settings.autoOptimizePrompts && (
               <p className="text-xs text-muted-foreground mt-3">
                 Uses DeepSeek-R1 or Skylark-pro to enhance your prompts for better results
               </p>

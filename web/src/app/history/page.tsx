@@ -8,7 +8,7 @@ import { useAppStore } from "@/lib/store"
 import Image from "next/image"
 
 export default function HistoryPage() {
-  const { history, clearHistory, removeFromHistory } = useAppStore()
+  const { history, clearHistory, removeGeneration } = useAppStore()
   const [filter, setFilter] = useState<"all" | "image" | "video">("all")
 
   const filteredHistory = history.filter(item =>
@@ -100,7 +100,7 @@ export default function HistoryPage() {
               <Card key={item.id} className="overflow-hidden">
                 <div className="relative aspect-square">
                   <Image
-                    src={item.result.url}
+                    src={item.url}
                     alt={item.prompt}
                     fill
                     className="object-cover"
@@ -115,9 +115,9 @@ export default function HistoryPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {item.optimizedPrompt && (
+                  {item.revisedPrompt && (
                     <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
-                      Optimized: {item.optimizedPrompt}
+                      Optimized: {item.revisedPrompt}
                     </p>
                   )}
                   <div className="flex gap-2">
@@ -125,7 +125,7 @@ export default function HistoryPage() {
                       size="sm"
                       variant="outline"
                       className="flex-1"
-                      onClick={() => handleDownload(item.result.url, item.id)}
+                      onClick={() => handleDownload(item.url, item.id)}
                     >
                       <Download className="mr-2 h-3 w-3" />
                       Download
@@ -133,7 +133,7 @@ export default function HistoryPage() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => removeFromHistory(item.id)}
+                      onClick={() => removeGeneration(item.id)}
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>
