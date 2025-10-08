@@ -33,10 +33,7 @@ const nextConfig = {
         hostname: '**',
       },
     ],
-    formats: ['image/avif', 'image/webp'], // Modern formats for better compression
-    minimumCacheTTL: 31536000, // Cache optimized images for 1 year
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840], // Responsive image sizes
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384], // Thumbnail sizes
+    formats: ['image/webp', 'image/avif'],
   },
 
   // Performance: Compression
@@ -52,19 +49,14 @@ const nextConfig = {
 
   // Performance: Package optimization
   experimental: {
-    optimizePackageImports: ['@/lib', '@/components', 'lucide-react', 'date-fns'],
-    webVitalsAttribution: ['CLS', 'LCP'], // Track performance metrics
+    optimizePackageImports: ['@/lib', '@/components', 'lucide-react', '@radix-ui/react-icons'],
   },
-
-  // Performance: Output optimization
-  output: 'standalone', // Optimize output for Docker/serverless
-
-  // Performance: Compiler options
+  // Performance optimizations
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production' ? {
-      exclude: ['error', 'warn'], // Remove console.log in production, keep errors/warnings
-    } : false,
+    removeConsole: process.env.NODE_ENV === 'production',
   },
+  // Output file tracing root
+  outputFileTracingRoot: process.env.OUTPUT_FILE_TRACING_ROOT,
 };
 
 export default nextConfig;
