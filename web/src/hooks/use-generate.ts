@@ -3,11 +3,36 @@ import { apiClient, type GenerateImageRequest } from '@/lib/api-client';
 import { useAppStore } from '@/lib/store';
 import { useToast } from './use-toast';
 
-export function useGenerate() {
+/**
+ * Custom hook for text-to-image generation
+ *
+ * Handles image generation with loading states, error handling,
+ * and automatic history tracking.
+ *
+ * @example
+ * ```tsx
+ * const { generateImage, isLoading, error } = useGenerateImage();
+ *
+ * const handleGenerate = async () => {
+ *   try {
+ *     const result = await generateImage({
+ *       model: 'seedream-4-0-250828',
+ *       prompt: 'A beautiful sunset over mountains',
+ *       size: '2K',
+ *       watermark: true
+ *     });
+ *     console.log('Generated:', result.data[0].url);
+ *   } catch (err) {
+ *     console.error('Generation failed:', err);
+ *   }
+ * };
+ * ```
+ */
+export function useGenerateImage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { addToHistory, settings } = useAppStore();
+  const { addGeneration: addToHistory } = useAppStore();
 
   const generateImage = async (params: GenerateImageRequest) => {
     setIsLoading(true);
@@ -23,11 +48,10 @@ export function useGenerate() {
           addToHistory({
             type: 'image',
             prompt: params.prompt,
-            model: params.model,
-            result: {
-              url: item.url,
-            },
-            params: {
+            model: params.model as any,
+            url: item.url,
+            revisedPrompt: item.revised_prompt,
+            metadata: {
               size: params.size,
               watermark: params.watermark,
               seed: params.seed,
@@ -62,3 +86,6 @@ export function useGenerate() {
     error,
   };
 }
+
+// Legacy export for backward compatibility
+export const useGenerate = useGenerateImage;

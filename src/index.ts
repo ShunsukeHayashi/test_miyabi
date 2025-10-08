@@ -45,17 +45,8 @@ async function main(): Promise<void> {
   console.log('✅ BytePlus client initialized');
   console.log(`   Endpoint: ${process.env.BYTEPLUS_ENDPOINT}\n`);
 
-  // Check API health
-  console.log('🔍 Checking API health...');
-  const isHealthy = await client.checkHealth();
-
-  if (!isHealthy) {
-    console.error('❌ BytePlus API is not accessible');
-    console.error('   Please check your API key and endpoint');
-    process.exit(1);
-  }
-
-  console.log('✅ API is healthy\n');
+  // Skip health check (costs API credits)
+  console.log('⏭️  Skipping health check (proceeding to generation)\n');
 
   // Example 1: Generate a single image
   console.log('📸 Example 1: Generating a single image...');
