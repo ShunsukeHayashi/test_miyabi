@@ -82,7 +82,8 @@ export class CoordinatorAgent extends BaseAgent {
 
       // Identify critical path
       const criticalPath = this.identifyCriticalPath(dag);
-      this.log(`Critical path: ${criticalPath.join(' → ')}`);
+      const criticalPathStr = criticalPath?.length > 0 ? criticalPath.join(' → ') : 'none';
+      this.log(`Critical path: ${criticalPathStr}`);
 
       // Assign agents
       const assignments = this.assignAgents(subtasks);
