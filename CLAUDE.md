@@ -183,9 +183,147 @@ BYTEPLUS_ENDPOINT=https://api.byteplus.com/v1
 
 ## Byteflow開発ガイドライン
 
+### 🤖 プロンプト最適化（T2T: Text-to-Text）
+
+BytePlusのテキスト生成AI（DeepSeek-R1、Skylark-pro）を使用して、画像・動画生成用の高品質プロンプトを自動生成できます。
+
+#### 統合クライアント（推奨）
+
+```typescript
+import { BytePlusAI } from './api/byteplus-ai.js';
+
+const ai = new BytePlusAI({
+  apiKey: process.env.BYTEPLUS_API_KEY!,
+  endpoint: process.env.BYTEPLUS_ENDPOINT!,
+  debug: true
+});
+
+// 自動プロンプト最適化付き画像生成
+const result = await ai.generateImage(
+  {
+    model: 'seedream-4-0-250828',
+    prompt: 'a beautiful sunset', // シンプルな入力
+    size: '2K'
+  },
+  { optimizePrompt: true } // 自動最適化
+);
+
+// AIが "a beautiful sunset" を詳細な高品質プロンプトに変換
+console.log(`Generated: ${result.data[0].url}`);
+```
+
+#### プロンプトチェーン（最高品質）
+
+複数ステップで段階的にプロンプトを改善：
+
+```typescript
+// マルチステップ最適化
+const result = await ai.generateImage(
+  {
+    model: 'seedream-4-0-250828',
+    prompt: 'sunset landscape',
+    size: '2K'
+  },
+  { useChain: true } // プロンプトチェーン使用
+);
+
+// 3ステップで最適化:
+// 1. コンセプト拡張
+// 2. 技術的詳細追加
+// 3. 最終磨き上げ
+```
+
+#### ストーリー生成（連続画像）
+
+一貫性のある複数画像を自動生成：
+
+```typescript
+const images = await ai.generateStory(
+  'A hero\'s journey: village → forest → castle',
+  3, // 3枚の画像
+  {
+    model: 'seedream-4-0-250828',
+    size: '2K',
+    watermark: false
+  }
+);
+
+// AIがストーリーを3つのシーンに分解し、
+// 各シーンに最適化されたプロンプトで画像生成
+images.forEach((img, i) => {
+  console.log(`Scene ${i + 1}: ${img.data[0].url}`);
+});
+```
+
+#### 手動プロンプト最適化
+
+```typescript
+import { PromptOptimizer } from './services/prompt-optimizer.js';
+
+const optimizer = new PromptOptimizer({
+  apiKey: process.env.BYTEPLUS_API_KEY!,
+  endpoint: process.env.BYTEPLUS_ENDPOINT!
+});
+
+// 画像生成用プロンプト最適化
+const t2iPrompt = await optimizer.optimizeForImage(
+  'a cat on a windowsill',
+  'photorealistic'
+);
+
+// 画像編集用プロンプト最適化
+const i2iPrompt = await optimizer.optimizeForImageEdit(
+  'add rainbow in sky'
+);
+
+// 動画生成用プロンプト最適化
+const i2vPrompt = await optimizer.optimizeForVideo(
+  'smooth camera pan left'
+);
+
+console.log('Optimized prompts:', { t2iPrompt, i2iPrompt, i2vPrompt });
+```
+
+#### カスタムプロンプトチェーン
+
+```typescript
+import { PromptChain } from './services/prompt-chain.js';
+
+const chain = new PromptChain({
+  apiKey: process.env.BYTEPLUS_API_KEY!,
+  endpoint: process.env.BYTEPLUS_ENDPOINT!
+});
+
+// カスタムチェーン定義
+const result = await chain.execute(
+  'cyberpunk city',
+  [
+    {
+      name: 'Style Analysis',
+      systemPrompt: 'Analyze and expand the cyberpunk aesthetic',
+      temperature: 0.8
+    },
+    {
+      name: 'Technical Details',
+      systemPrompt: 'Add lighting, composition, camera details',
+      temperature: 0.6
+    },
+    {
+      name: 'Final Polish',
+      systemPrompt: 'Refine for maximum quality',
+      temperature: 0.5
+    }
+  ]
+);
+
+console.log('Final prompt:', result.finalPrompt);
+console.log('Tokens used:', result.totalTokens);
+console.log('Steps:', result.steps.map(s => s.name));
+```
+
 ### BytePlus API使用方法
 
-#### SEEDDREAM（高品質画像生成）
+#### Text-to-Image（SEEDREAM4）
 
 ```typescript
 import { BytePlusClient } from './api/byteplus-client.js';
@@ -195,54 +333,123 @@ const client = new BytePlusClient({
   endpoint: process.env.BYTEPLUS_ENDPOINT!
 });
 
-// 基本的な画像生成
-const result = await client.generateImage('seeddream', {
+// 基本的な画像生成（t2i）
+const result = await client.generateImage({
+  model: 'seedream-4-0-250828',
   prompt: 'A beautiful sunset over mountains, photorealistic style',
-  negativePrompt: 'blurry, low quality, distorted',
-  width: 1024,
-  height: 1024,
-  style: 'Photorealistic',
-  seed: 42,
-  guidanceScale: 7.5
+  size: '2K',
+  response_format: 'url',
+  watermark: true,
+  seed: 42
 });
 
-console.log(`Generated image: ${result.imageUrl}`);
+console.log(`Generated image: ${result.data[0].url}`);
 ```
 
-#### SEEDDREAM4（次世代モデル）
+#### Image-to-Image（SEEDEDIT i2i）
 
 ```typescript
-// より高品質な画像生成
-const result = await client.generateImage('seeddream4', {
-  prompt: 'Futuristic cityscape with flying cars, cyberpunk aesthetic',
-  width: 2048,
-  height: 2048,
-  style: '3D',
-  guidanceScale: 8.0
+// 画像編集（i2i）
+const result = await client.generateImage({
+  model: 'Bytedance-SeedEdit-3.0-i2i',
+  prompt: 'Add a rainbow in the sky, enhance colors',
+  image: ['https://example.com/source-image.jpg'],
+  size: '2K',
+  response_format: 'url'
+});
+
+console.log(`Edited image: ${result.data[0].url}`);
+```
+
+#### Sequential Image Generation（連続生成）
+
+```typescript
+// 複数画像の連続生成
+const result = await client.generateImage({
+  model: 'seedream-4-0-250828',
+  prompt: 'Generate 3 images of a girl and a cow plushie happily riding a roller coaster',
+  image: ['https://example.com/ref1.png', 'https://example.com/ref2.png'],
+  sequential_image_generation: 'auto',
+  sequential_image_generation_options: {
+    max_images: 3
+  },
+  size: '2K',
+  stream: true,
+  watermark: true
+});
+
+result.data.forEach((img, i) => {
+  console.log(`Image ${i + 1}: ${img.url}`);
 });
 ```
 
-#### SEEDDANCE（動画生成）
+#### Image-to-Video（AI動画生成）
 
 ```typescript
-// ダンス動画生成
-const video = await client.generateDanceVideo(
-  './source-image.png',
-  'hip-hop'
-);
+// 画像から動画を生成（i2v）
+const video = await client.generateVideo({
+  model: 'Bytedance-Seedance-1.0-pro',
+  image: 'https://example.com/source-image.jpg',
+  prompt: 'Dynamic camera movement, cinematic style, smooth motion',
+  resolution: '1080P',
+  ratio: '16:9',
+  duration: 5,
+  quantity: 1,
+  fixed_lens: false, // カメラを動的に移動
+  watermark: true,
+  seed: 42
+});
 
-console.log(`Generated video: ${video.videoUrl}`);
+console.log(`Generated video: ${video.data[0].url}`);
+console.log(`Thumbnail: ${video.data[0].thumbnail_url}`);
+```
+
+#### 固定カメラでの動画生成
+
+```typescript
+// 固定カメラ（フレーミング固定）
+const video = await client.generateVideo({
+  model: 'Bytedance-Seedance-1.0-pro',
+  image: 'https://example.com/product.jpg',
+  prompt: 'Product showcase, professional lighting',
+  resolution: '1080P',
+  ratio: '1:1',
+  duration: 10,
+  fixed_lens: true, // カメラ固定
+  watermark: false
+});
 ```
 
 ### モデル選択ガイドライン
 
-| 用途 | 推奨モデル | 理由 |
-|------|-----------|------|
-| 商品画像 | SEEDDREAM | コスパ良好、高品質 |
-| 芸術作品 | SEEDDREAM4 | 最高品質、複雑な表現 |
-| 動画コンテンツ | SEEDDANCE | 動的コンテンツ専用 |
-| 大量生成 | SEEDDREAM | コスト効率重視 |
-| プロトタイプ | SEEDDREAM | 高速生成 |
+| 用途 | 推奨モデル | パラメータ | 理由 |
+|------|-----------|-----------|------|
+| **画像生成** ||||
+| 新規画像生成 | seedream-4-0-250828 | t2i | 最高品質、テキストから画像 |
+| 画像編集・修正 | Bytedance-SeedEdit-3.0-i2i | i2i | 既存画像の編集・加工 |
+| 連続ストーリー | sequential_image_generation | max_images: 3-10 | 一貫性のある複数画像 |
+| 大量生成 | batchGenerate() | maxConcurrency: 10 | コスト効率重視 |
+| **動画生成** ||||
+| AI動画生成 | Bytedance-Seedance-1.0-pro | i2v | 画像から動画生成 |
+| 固定カメラ動画 | Bytedance-Seedance-1.0-pro | fixed_lens: true | 商品紹介、静的シーン |
+| **プロンプト最適化** ||||
+| 高度な推論 | DeepSeek-R1-250528 | T2T | 詳細分析、複雑なプロンプト |
+| 高速生成 | Skylark-pro-250415 | T2T | BytePlus最適化、低レイテンシ |
+| プロンプトチェーン | 3ステップ最適化 | useChain: true | 最高品質プロンプト |
+
+### T2Tモデルの使い分け
+
+**DeepSeek-R1-250528**:
+- 高度な推論能力
+- 複雑なコンセプトの展開
+- 詳細なプロンプト生成
+- 無料枠: 500,000 tokens
+
+**Skylark-pro-250415**:
+- BytePlus最適化モデル
+- 低レイテンシ
+- シンプルなプロンプト最適化
+- アジア太平洋地域で高速
 
 ### エラーハンドリング
 
@@ -250,16 +457,22 @@ console.log(`Generated video: ${video.videoUrl}`);
 import { BytePlusAPIError } from './api/byteplus-client.js';
 
 try {
-  const result = await client.generateImage('seeddream', request);
+  const result = await client.generateImage({
+    model: 'seedream-4-0-250828',
+    prompt: 'test',
+    size: '2K'
+  });
 } catch (error) {
   if (error instanceof BytePlusAPIError) {
     if (error.statusCode === 429) {
-      // レート制限エラー: リトライ
-      await exponentialBackoff();
-      return retry();
+      // レート制限エラー: 自動リトライ（内部で実行済み）
+      console.error('Rate limit exceeded');
     } else if (error.statusCode === 400) {
-      // 不正なリクエスト: プロンプト修正
-      console.error('Invalid prompt:', request.prompt);
+      // 不正なリクエスト: パラメータ確認
+      console.error('Invalid request parameters');
+    } else if (error.statusCode === 401) {
+      // 認証エラー: APIキー確認
+      console.error('Invalid API key or endpoint');
     }
   }
   throw error;
@@ -268,7 +481,7 @@ try {
 
 ### プロンプトベストプラクティス
 
-#### 高品質プロンプト例
+#### 高品質プロンプト例（t2i）
 
 ```typescript
 const goodPrompt = `
@@ -279,15 +492,31 @@ commercial photography style
 
 // NG例: 曖昧すぎる
 const badPrompt = "a bag";
+
+// 使用例
+const result = await client.generateImage({
+  model: 'seedream-4-0-250828',
+  prompt: goodPrompt,
+  size: '2K',
+  watermark: false // 商品写真では透かしを無効化
+});
 ```
 
-#### ネガティブプロンプト活用
+#### 画像編集プロンプト例（i2i）
 
 ```typescript
-const negativePrompt = `
-blurry, low quality, distorted, deformed, ugly,
-bad anatomy, watermark, text, signature
+// 既存画像を編集する場合
+const editPrompt = `
+Add vibrant sunset lighting, enhance colors,
+add soft glow effect, professional photo editing
 `;
+
+const result = await client.generateImage({
+  model: 'Bytedance-SeedEdit-3.0-i2i',
+  prompt: editPrompt,
+  image: ['https://example.com/original.jpg'],
+  size: '2K'
+});
 ```
 
 ### Agent連携パターン

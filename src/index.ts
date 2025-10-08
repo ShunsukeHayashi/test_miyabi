@@ -60,20 +60,20 @@ async function main(): Promise<void> {
   // Example 1: Generate a single image
   console.log('📸 Example 1: Generating a single image...');
   try {
-    const result = await client.generateImage('seeddream4', {
+    const result = await client.generateImage({
+      model: 'seedream-4-0-250828',
       prompt:
         'A beautiful sunset over mountains, photorealistic style, golden hour lighting',
-      negativePrompt: 'blurry, low quality, distorted',
-      width: 1024,
-      height: 1024,
-      style: 'Photorealistic',
+      size: '2K',
+      response_format: 'url',
+      watermark: true,
       seed: 42,
     });
 
     console.log('✅ Image generated successfully');
-    console.log(`   URL: ${result.imageUrl}`);
-    console.log(`   Seed: ${result.seed}`);
-    console.log(`   Generation time: ${result.metadata.generationTime}ms\n`);
+    console.log(`   URL: ${result.data[0]?.url}`);
+    console.log(`   Seed: ${result.seed ?? 'N/A'}`);
+    console.log(`   Generation time: ${result.metadata?.generationTime ?? 'N/A'}ms\n`);
   } catch (error) {
     console.error('❌ Failed to generate image:', error);
   }
@@ -88,9 +88,9 @@ async function main(): Promise<void> {
         'An underwater coral reef, colorful fish, crystal clear water',
       ],
       sharedParams: {
-        width: 1024,
-        height: 1024,
-        style: 'Photorealistic',
+        model: 'seedream-4-0-250828',
+        size: '2K',
+        watermark: true,
       },
       maxConcurrency: 3,
     });
