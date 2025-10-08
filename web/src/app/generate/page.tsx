@@ -18,13 +18,16 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Sparkles, Download, RefreshCw, Heart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import type { GenerationParameters } from '@/components/custom/parameter-controls';
 
 export default function GeneratePage() {
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState('seedream-4-0-250828');
-  const [size, setSize] = useState<'1K' | '2K' | '4K'>('2K');
-  const [watermark, setWatermark] = useState(true);
-  const [seed, setSeed] = useState<number | undefined>(undefined);
+  const [parameters, setParameters] = useState<GenerationParameters>({
+    size: '2K',
+    watermark: true,
+    seed: undefined,
+  });
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<any>(null);
 
@@ -42,9 +45,9 @@ export default function GeneratePage() {
       const result = await generateImage({
         model: model as any,
         prompt,
-        size,
-        watermark,
-        seed,
+        size: parameters.size as any,
+        watermark: parameters.watermark,
+        seed: parameters.seed,
       });
 
       if (result.data && result.data.length > 0) {
@@ -53,8 +56,8 @@ export default function GeneratePage() {
           prompt,
           revisedPrompt: result.data[0].revised_prompt,
           model,
-          size,
-          seed,
+          size: parameters.size,
+          seed: parameters.seed,
         });
       }
     } catch (err) {
@@ -122,27 +125,15 @@ export default function GeneratePage() {
             <ModelSelector
               value={model}
               onChange={setModel}
-              models={[
-                {
-                  id: 'seedream-4-0-250828',
-                  name: 'SEEDREAM 4.0',
-                  description: 'Highest quality, best for detailed images',
-                },
-              ]}
+              filterByType="t2i"
             />
           </Card>
 
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Parameters</h2>
-            <ParameterControls
-              size={size}
-              onSizeChange={setSize}
-              watermark={watermark}
-              onWatermarkChange={setWatermark}
-              seed={seed}
-              onSeedChange={setSeed}
-            />
-          </Card>
+          <ParameterControls
+            value={parameters}
+            onChange={setParameters}
+            modelType="t2i"
+          />
 
           <Button
             onClick={handleGenerate}
@@ -186,9 +177,8 @@ export default function GeneratePage() {
             <>
               <Card className="p-6">
                 <ImagePreview
-                  imageUrl={generatedImage}
+                  src={generatedImage}
                   alt={metadata?.prompt || 'Generated image'}
-                  metadata={metadata}
                 />
               </Card>
 

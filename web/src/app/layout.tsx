@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
@@ -19,6 +20,7 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Byteflow - AI Image Generation Platform",
   description: "Create stunning images with BytePlus AI - powered by SEEDREAM, SEEDDREAM4, and SEEDDANCE models",
+  keywords: ["AI", "image generation", "BytePlus", "SEEDREAM", "text-to-image", "image-to-image"],
 };
 
 export default function RootLayout({
@@ -29,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
         <ThemeProvider
           attribute="class"
@@ -38,7 +40,8 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Header />
-          <main className="min-h-screen">{children}</main>
+          <main className="flex-1">{children}</main>
+          <Footer />
           <Toaster />
         </ThemeProvider>
       </body>
