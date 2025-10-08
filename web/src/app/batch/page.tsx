@@ -10,8 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { useBatchGenerate } from "@/hooks/use-batch-generate"
 import Image from "next/image"
-import JSZip from 'jszip'
-import { saveAs } from 'file-saver'
 
 export default function BatchPage() {
   const [prompts, setPrompts] = useState<string[]>([""])
@@ -70,6 +68,12 @@ export default function BatchPage() {
 
   const handleBulkDownload = async () => {
     if (generatedImages.length === 0) return
+
+    // Lazy load JSZip and file-saver only when needed
+    const [{ default: JSZip }, { saveAs }] = await Promise.all([
+      import('jszip'),
+      import('file-saver')
+    ])
 
     const zip = new JSZip()
 

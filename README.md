@@ -107,78 +107,221 @@ test_miyabi/
 
 ### 1. Prerequisites
 
-- **Node.js**: 18.0.0以上
-- **npm**: 9.0.0以上
-- **Git**: 最新版
+- **Node.js**: 18.0.0以上 ([Download](https://nodejs.org/))
+- **npm**: 9.0.0以上 (included with Node.js)
+- **Git**: 最新版 ([Download](https://git-scm.com/))
+- **BytePlus API Key**: Sign up at [BytePlus Console](https://console.byteplus.com/)
+
+**Verify Installation**:
+```bash
+node --version  # Should be v18.0.0 or higher
+npm --version   # Should be v9.0.0 or higher
+git --version   # Should be v2.x.x or higher
+```
 
 ### 2. Installation
 
+#### Step 1: Clone Repository
 ```bash
-# Clone repository
 git clone https://github.com/ShunsukeHayashi/test_miyabi.git
 cd test_miyabi
+```
 
-# Install dependencies (root)
+#### Step 2: Install Root Dependencies
+```bash
 npm install
 
-# Install dependencies (web)
-cd web && npm install && cd ..
+# Expected output:
+# added 150+ packages in 30s
 ```
 
-### 3. Environment Setup
-
+#### Step 3: Install Web App Dependencies
 ```bash
-# Copy example environment file
+cd web
+npm install
+
+# Expected output:
+# added 200+ packages in 45s
+
+cd ..
+```
+
+### 3. Environment Configuration
+
+#### Step 1: Create Environment Files
+
+**For Root Project**:
+```bash
+# Copy example file
 cp .env.example .env
 
-# Edit .env and add your API keys
-nano .env
+# Edit with your preferred editor
+nano .env  # or: vim .env, code .env
 ```
 
-Required environment variables:
+**For Web App**:
+```bash
+cd web
+cp .env.local.example .env.local
+nano .env.local
+cd ..
+```
 
+#### Step 2: Configure API Keys
+
+**Root `.env`** (required for CLI agents):
 ```bash
 # BytePlus API (Required)
-BYTEPLUS_API_KEY=your_byteplus_api_key
+BYTEPLUS_API_KEY=bp_xxxxxxxxxxxxxxxxxxxxx
 BYTEPLUS_ENDPOINT=https://ark.ap-southeast.bytepluses.com/api/v3/images/generations
 
-# Anthropic API (Optional, for agents)
-ANTHROPIC_API_KEY=your_anthropic_api_key
+# Anthropic API (Optional, for AI agents)
+ANTHROPIC_API_KEY=sk-ant-api03-xxxxxxxxxxxxx
 
 # GitHub (Optional, for agent automation)
-GITHUB_TOKEN=your_github_token
-GITHUB_OWNER=your_github_username
+GITHUB_TOKEN=ghp_xxxxxxxxxxxxx
+GITHUB_OWNER=YourGitHubUsername
 GITHUB_REPO=test_miyabi
-
-# JWT Secret (for web authentication)
-JWT_SECRET=your_secure_random_secret_key_here
-JWT_REFRESH_SECRET=your_refresh_secret_key_here
 ```
 
-### 4. Run Web Application
+**Web `web/.env.local`** (required for web app):
+```bash
+# JWT Secret - Generate with: openssl rand -base64 32
+JWT_SECRET=your_secure_32_character_random_string_here_please_change
+
+# Database (SQLite - default location)
+DATABASE_URL="file:./dev.db"
+
+# BytePlus API
+BYTEPLUS_API_KEY=bp_xxxxxxxxxxxxxxxxxxxxx
+BYTEPLUS_ENDPOINT=https://ark.ap-southeast.bytepluses.com/api/v3/images/generations
+```
+
+**Generate Secure JWT Secret**:
+```bash
+# macOS/Linux:
+openssl rand -base64 32
+
+# Or Node.js:
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+
+# Copy the output to JWT_SECRET in .env.local
+```
+
+#### Step 3: Setup Database
 
 ```bash
 cd web
 
-# Development mode
-npm run dev
+# Initialize Prisma database
+npx prisma generate
 
-# Build for production
-npm run build
-npm start
+# Create database schema
+npx prisma db push
 
-# Run tests
-npm test              # Component tests
-npm run test:e2e     # E2E tests
-npm run test:coverage # Coverage report
+# Verify database (opens Prisma Studio GUI)
+npx prisma studio
+# Visit: http://localhost:5555
+
+cd ..
 ```
 
-Visit: http://localhost:3000
+### 4. Run Web Application
+
+#### Development Mode
+
+```bash
+cd web
+npm run dev
+```
+
+**Expected Output**:
+```
+  ▲ Next.js 15.5.4
+  - Local:        http://localhost:3000
+  - Ready in 2.3s
+
+✓ Compiled / in 500ms
+```
+
+#### Open in Browser
+
+Visit: **http://localhost:3000**
+
+You should see the Byteflow homepage with:
+- ✨ Header with navigation (Generate, Edit, Batch, History, Settings)
+- 📊 Feature cards
+- 🎨 Quick start buttons
+
+#### First-Time Setup
+
+1. **Create Account**:
+   - Click "Sign Up" (top-right corner)
+   - Enter email and password (min 8 chars, 1 uppercase, 1 number)
+   - Click "Create Account"
+
+2. **Configure API Key** (in web app):
+   - Navigate to **Settings** page
+   - Enter your BytePlus API Key
+   - Click "Test" to verify connection
+   - Save settings
+
+3. **Generate Your First Image**:
+   - Navigate to **Generate** page
+   - Enter a prompt: `"A beautiful sunset over mountains, photorealistic"`
+   - Select model: `SEEDREAM 4.0`
+   - Click "Generate Image"
+   - Wait ~8 seconds
+   - Download or save to favorites!
+
+#### Production Build
+
+```bash
+cd web
+
+# Build optimized version
+npm run build
+
+# Start production server
+npm start
+
+# Or build and start:
+npm run build && npm start
+```
+
+#### Run Tests
+
+```bash
+cd web
+
+# Unit tests (Vitest)
+npm test
+
+# Watch mode
+npm run test:watch
+
+# E2E tests (Playwright)
+npm run test:e2e
+
+# E2E with UI
+npm run test:e2e:ui
+
+# Coverage report
+npm run test:coverage
+# Open: web/coverage/index.html
+```
 
 ### 5. Run Autonomous Agents (CLI)
 
+The Miyabi Framework provides 10 autonomous agents that can execute tasks automatically.
+
+#### Basic Agent Execution
+
 ```bash
-# Dry-run mode (no API key required)
+# View available commands
+npm run agents:parallel:exec -- --help
+
+# Dry-run mode (no API calls, for testing)
 npm run agents:parallel:exec -- --issues 59,57,56 --concurrency 3 --dry-run
 
 # Single issue execution
@@ -187,9 +330,83 @@ npm run agents:parallel:exec -- --issue 59
 # Multiple issues in parallel
 npm run agents:parallel:exec -- --issues 29,30,32 --concurrency 2
 
-# Debug mode
+# Debug mode with verbose logging
 npm run agents:parallel:exec -- --issue 59 --log-level debug
 ```
+
+#### Agent Workflow Example
+
+1. **Create GitHub Issue**:
+   ```bash
+   gh issue create \
+     --title "Add user profile page" \
+     --body "Create /profile page with user info and settings"
+   ```
+
+2. **Run Agent Pipeline**:
+   ```bash
+   # Replace 60 with your issue number
+   npm run agents:parallel:exec -- --issue 60
+   ```
+
+3. **Monitor Progress**:
+   - IssueAgent analyzes and labels issue
+   - CoordinatorAgent creates DAG execution plan
+   - CodeGenAgent generates code
+   - ReviewAgent validates quality (80%+ score)
+   - TestAgent runs tests
+   - PRAgent creates Draft PR
+   - DeploymentAgent deploys (if configured)
+
+4. **Review Results**:
+   ```bash
+   # Check generated PR
+   gh pr list
+
+   # View agent logs
+   tail -f agent-execution.log
+   ```
+
+### 6. Verify Installation
+
+Run system verification:
+```bash
+npm run verify
+```
+
+**Expected Output**:
+```
+✓ Node.js version: v20.10.0
+✓ npm version: v10.2.3
+✓ TypeScript compilation: Success
+✓ Web app build: Success
+✓ Database connection: OK
+✓ Environment variables: All required vars present
+✓ API connectivity: BytePlus API reachable
+
+✅ All checks passed! System is ready.
+```
+
+### Next Steps
+
+1. **Explore Features**: Try all 5 pages (Generate, Edit, Batch, History, Settings)
+2. **Read Documentation**: Check [docs/](./docs/) for detailed guides
+3. **Try Examples**: Run code in [examples/](./examples/) folder
+4. **Customize**: Modify components in `web/src/components/`
+5. **Deploy**: Follow [Vercel deployment guide](#) (coming soon)
+
+### Quick Reference Card
+
+| Task | Command |
+|------|---------|
+| Start web app | `cd web && npm run dev` |
+| Run tests | `cd web && npm test` |
+| Build production | `cd web && npm run build` |
+| Run agents | `npm run agents:parallel:exec -- --issue <num>` |
+| View database | `cd web && npx prisma studio` |
+| Check types | `npm run typecheck` |
+| Format code | `npm run format` |
+| Verify system | `npm run verify` |
 
 ## 📖 Usage Examples
 
@@ -320,6 +537,128 @@ console.log(`Video: ${result.output.url}`);
 
 ## 🏗️ Architecture
 
+### System Overview
+
+```mermaid
+graph TB
+    subgraph "User Interface"
+        WEB[Next.js Web App]
+        CLI[CLI Tool]
+    end
+
+    subgraph "Miyabi Framework - 10 Autonomous Agents"
+        COORD[CoordinatorAgent<br/>DAG Orchestration]
+        ISSUE[IssueAgent<br/>Analysis & Labeling]
+        CODEGEN[CodeGenAgent<br/>AI Code Generation]
+        REVIEW[ReviewAgent<br/>Quality Validation]
+        PR[PRAgent<br/>PR Automation]
+        DEPLOY[DeploymentAgent<br/>CI/CD]
+        TEST[TestAgent<br/>Test Execution]
+        CONTENT[ContentGenAgent<br/>T2T Optimization]
+        IMAGE[ImageGenAgent<br/>Image Operations]
+        VIDEO[VideoGenAgent<br/>Video Operations]
+    end
+
+    subgraph "API Layer"
+        BYTEAI[BytePlus AI Client]
+        BYTECLIENT[BytePlus Client]
+        TEXTGEN[Text Generation Client]
+    end
+
+    subgraph "External Services"
+        SEEDREAM[SEEDREAM4 API<br/>Image Generation]
+        SEEDEDIT[SEEDEDIT API<br/>Image Editing]
+        SEEDANCE[SEEDANCE API<br/>Video Generation]
+        DEEPSEEK[DeepSeek-R1<br/>Text Generation]
+        SKYLARK[Skylark-pro<br/>Text Generation]
+        CLAUDE[Claude Sonnet 4<br/>AI Reasoning]
+    end
+
+    subgraph "Database"
+        PRISMA[(Prisma ORM)]
+        SQLITE[(SQLite)]
+    end
+
+    WEB --> COORD
+    CLI --> COORD
+
+    COORD --> ISSUE
+    COORD --> CODEGEN
+    COORD --> CONTENT
+    COORD --> IMAGE
+    COORD --> VIDEO
+
+    CODEGEN --> REVIEW
+    REVIEW --> TEST
+    TEST --> PR
+    PR --> DEPLOY
+
+    CONTENT --> BYTEAI
+    IMAGE --> BYTEAI
+    VIDEO --> BYTECLIENT
+
+    BYTEAI --> TEXTGEN
+    BYTEAI --> BYTECLIENT
+
+    BYTECLIENT --> SEEDREAM
+    BYTECLIENT --> SEEDEDIT
+    BYTECLIENT --> SEEDANCE
+
+    TEXTGEN --> DEEPSEEK
+    TEXTGEN --> SKYLARK
+
+    CODEGEN --> CLAUDE
+    ISSUE --> CLAUDE
+
+    WEB --> PRISMA
+    PRISMA --> SQLITE
+
+    style COORD fill:#f9f,stroke:#333,stroke-width:4px
+    style SEEDREAM fill:#9cf,stroke:#333,stroke-width:2px
+    style CLAUDE fill:#fcf,stroke:#333,stroke-width:2px
+```
+
+### Data Flow - Image Generation
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Web as Next.js App
+    participant Store as Zustand Store
+    participant API as API Route
+    participant Agent as ImageGenAgent
+    participant BytePlus as BytePlus API
+    participant DB as SQLite DB
+
+    User->>Web: Enter prompt & click Generate
+    Web->>Store: Update loading state
+    Web->>API: POST /api/generate
+
+    API->>Agent: execute(ImageGenRequest)
+    Agent->>Agent: Validate input
+
+    opt Prompt Optimization
+        Agent->>BytePlus: T2T optimization request
+        BytePlus-->>Agent: Enhanced prompt
+    end
+
+    Agent->>BytePlus: Generate image (SEEDREAM4)
+    BytePlus-->>Agent: Image URL + metadata
+
+    Agent->>Agent: Quality validation
+
+    alt Quality Score >= 80
+        Agent-->>API: Success response
+        API->>DB: Save to history
+        DB-->>API: Saved
+        API-->>Web: {imageUrl, metadata}
+        Web->>Store: Add to history
+        Web->>User: Display image
+    else Quality Score < 80
+        Agent->>Agent: Retry with adjusted parameters
+    end
+```
+
 ### Miyabi Framework (10 Agents)
 
 | Agent | Type | Responsibility | Tech Stack |
@@ -389,29 +728,30 @@ console.log(`Video: ${result.output.url}`);
   - [x] DAG-based parallel execution
   - [x] Form components with validation
 
-- [ ] **Phase 4: 最適化・スケーリング** (Week 9-12) - 🚧 In Progress
+- [ ] **Phase 4: 最適化・スケーリング** (Week 9-12) - 🚧 In Progress (20% Complete)
   - [ ] Performance optimization
   - [ ] Vercel production deployment
   - [ ] Webhook integration
-  - [ ] README documentation update
+  - [x] README documentation update
   - [ ] Cost optimization engine
   - [ ] Real-time streaming
 
 ## 📊 Project Metrics
 
 **Implementation Statistics:**
-- **Total Commits**: 11
-- **Files Changed**: 141
-- **Lines Added**: 23,750+
-- **Lines Deleted**: 177
+- **Total Commits**: 15+
+- **Files Changed**: 160+
+- **Lines Added**: 30,000+
+- **Lines Deleted**: 200+
 - **PRs Merged**: 5
-- **Issues Closed**: 28+
+- **Issues Closed**: 35+ (Phase 1: 5/5, Phase 2: 26/26, Phase 3: 4/4)
 
 **Test Coverage:**
-- **E2E Tests**: 2 test suites
-- **Component Tests**: 4 test suites
+- **Unit Tests**: 6 auth test files (1,159+ lines, 80+ test cases)
+- **E2E Tests**: 2 test suites (Playwright)
+- **Component Tests**: 4 test suites (Vitest)
 - **Coverage Target**: 80%+
-- **Test Files**: 10+
+- **Test Files**: 15+
 
 **Code Quality:**
 - **TypeScript**: Strict mode enabled
@@ -497,40 +837,334 @@ This project follows the **Shikigaku Theory** (識学理論) autonomous developm
 
 ## 🐛 Troubleshooting
 
-### Common Issues
+### Environment & Setup Issues
 
-**1. "BytePlus API key is required" error**
+#### 1. "BytePlus API key is required" error
+
+**Problem**: Missing or invalid API key configuration
+
+**Solution**:
 ```bash
-# Make sure .env file exists and contains BYTEPLUS_API_KEY
+# Create .env file from example
 cp .env.example .env
-nano .env  # Add your API key
+
+# Edit and add your API key
+nano .env
+
+# Required variables:
+BYTEPLUS_API_KEY=bp_xxxxx  # Get from BytePlus Console
+BYTEPLUS_ENDPOINT=https://ark.ap-southeast.bytepluses.com/api/v3/images/generations
 ```
 
-**2. "Cannot find module" errors**
+**Verification**:
 ```bash
-# Reinstall dependencies
-rm -rf node_modules web/node_modules
+# Test API connection
+node -e "console.log(process.env.BYTEPLUS_API_KEY ? 'API key loaded' : 'API key missing')"
+```
+
+#### 2. "Cannot find module" errors
+
+**Problem**: Missing or corrupted dependencies
+
+**Solution**:
+```bash
+# Clean install for root project
+rm -rf node_modules package-lock.json
 npm install
-cd web && npm install
+
+# Clean install for web app
+cd web
+rm -rf node_modules package-lock.json .next
+npm install
+cd ..
+
+# Rebuild TypeScript
+npm run build
 ```
 
-**3. Web application won't start**
+#### 3. Web application won't start (Port conflicts)
+
+**Problem**: Port 3000 already in use
+
+**Solution**:
 ```bash
-# Check port availability
+# Find and kill process using port 3000
 lsof -ti:3000 | xargs kill -9
 
-# Restart dev server
-cd web && npm run dev
+# Or use different port
+cd web
+PORT=3001 npm run dev
+
+# Or configure in package.json:
+# "dev": "next dev -p 3001"
 ```
 
-**4. Agent execution fails**
+#### 4. Prisma migration errors
+
+**Problem**: Database schema mismatch
+
+**Solution**:
 ```bash
-# Use dry-run mode to test without API calls
+cd web
+
+# Reset database (WARNING: destroys data)
+rm -f prisma/dev.db prisma/dev.db-journal
+npx prisma migrate reset --force
+
+# Or apply pending migrations
+npx prisma migrate deploy
+
+# Regenerate Prisma Client
+npx prisma generate
+
+# Verify schema
+npx prisma studio  # Opens GUI at http://localhost:5555
+```
+
+### Runtime Issues
+
+#### 5. Agent execution fails
+
+**Problem**: Agent crashes or produces errors
+
+**Solution**:
+```bash
+# Use dry-run mode (no API calls)
 npm run agents:parallel:exec -- --issues 59,57,56 --concurrency 3 --dry-run
 
-# Check logs with debug mode
+# Enable debug logging
 npm run agents:parallel:exec -- --issue 59 --log-level debug
+
+# Check for missing environment variables
+npm run agents:parallel:exec -- --issue 59 --check-env
+
+# Single-threaded execution for debugging
+npm run agents:parallel:exec -- --issue 59 --concurrency 1
 ```
+
+#### 6. Image generation returns 429 (Rate Limit)
+
+**Problem**: Too many requests to BytePlus API
+
+**Solution**:
+```bash
+# The client has built-in rate limiting (10 req/sec)
+# Reduce concurrency for batch generation
+
+# In your code:
+const result = await batchGenerate({
+  prompts: [...],
+  maxConcurrency: 3,  // Reduce from 10 to 3
+})
+
+# Or wait and retry:
+# The client automatically retries with exponential backoff
+```
+
+#### 7. JWT token errors
+
+**Problem**: "Invalid token" or authentication failures
+
+**Solution**:
+```bash
+# Regenerate JWT secret
+cd web
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+
+# Add to .env.local:
+JWT_SECRET=<generated_secret>
+
+# Clear cookies and re-login
+# In browser: DevTools > Application > Cookies > Clear All
+
+# Verify token generation
+cd web
+npm run test -- tests/lib/auth/jwt.test.ts
+```
+
+### Build & Deployment Issues
+
+#### 8. TypeScript compilation errors
+
+**Problem**: Type errors preventing build
+
+**Solution**:
+```bash
+# Check for errors
+npm run typecheck
+
+# Common fixes:
+# 1. Update @types packages
+npm install -D @types/node@latest @types/react@latest
+
+# 2. Clear TypeScript cache
+rm -rf node_modules/.cache web/.next
+
+# 3. Regenerate Prisma types
+cd web && npx prisma generate && cd ..
+
+# 4. Verify tsconfig.json strict mode
+# Ensure: "strict": true
+```
+
+#### 9. Next.js build fails
+
+**Problem**: Build errors in production
+
+**Solution**:
+```bash
+cd web
+
+# Clear build cache
+rm -rf .next
+
+# Check for missing environment variables
+npm run build 2>&1 | grep "Environment"
+
+# Build with verbose logging
+npm run build -- --debug
+
+# Test production build locally
+npm run build && npm start
+```
+
+#### 10. Vitest tests fail
+
+**Problem**: Test suite errors
+
+**Solution**:
+```bash
+cd web
+
+# Run specific test file
+npm test -- tests/lib/auth/jwt.test.ts
+
+# Update snapshots if needed
+npm test -- -u
+
+# Clear test cache
+rm -rf node_modules/.vitest
+
+# Run with coverage to identify issues
+npm run test:coverage
+```
+
+### API Integration Issues
+
+#### 11. BytePlus API returns 400 (Bad Request)
+
+**Problem**: Invalid request parameters
+
+**Solution**:
+```typescript
+// Verify request format:
+const request: ImageGenerationRequest = {
+  model: 'seedream-4-0-250828',  // Correct model name
+  prompt: 'A beautiful sunset',   // Non-empty prompt
+  size: '2K',  // Valid size: '1K' | '2K' | '4K'
+  watermark: true,  // Boolean, not string
+  // seed: 42,  // Optional, must be number
+}
+
+// Check response for details:
+try {
+  const result = await client.generateImage(request);
+} catch (error) {
+  console.error('API Error:', error.message);
+  console.error('Status:', error.statusCode);
+  console.error('Details:', error.response);
+}
+```
+
+#### 12. Generated images are low quality
+
+**Problem**: Poor image quality despite good prompts
+
+**Solution**:
+```typescript
+// Use T2T prompt optimization:
+const ai = new BytePlusAI({ apiKey, endpoint });
+
+const result = await ai.generateImage(
+  {
+    model: 'seedream-4-0-250828',
+    prompt: 'your simple prompt',
+    size: '4K',  // Use highest resolution
+  },
+  {
+    optimizePrompt: true,  // Enable AI enhancement
+    // Or use prompt chaining:
+    useChain: true,
+  }
+);
+
+// Adjust guidance scale (if supported):
+// Higher values = more prompt adherence
+// Lower values = more creativity
+```
+
+### Performance Issues
+
+#### 13. Slow image generation
+
+**Problem**: Generation takes too long
+
+**Solution**:
+```bash
+# Check your internet connection:
+ping api.byteplus.com
+
+# Use batch generation with concurrency:
+const results = await batchGenerate({
+  prompts: [...],
+  maxConcurrency: 5,  // Parallel generation
+})
+
+# Consider using lower resolution for preview:
+size: '1K',  // Faster than '4K'
+
+# Enable caching (if implemented):
+# Check for duplicate prompts before generating
+```
+
+#### 14. High memory usage
+
+**Problem**: Application crashes with OOM errors
+
+**Solution**:
+```bash
+# Increase Node.js memory limit:
+NODE_OPTIONS="--max-old-space-size=4096" npm run dev
+
+# Or in package.json:
+"dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev"
+
+# Clear history periodically:
+# In web app: Settings > History Management > Clear History
+
+# Limit batch size:
+maxConcurrency: 3,  // Instead of 10
+```
+
+### Getting Help
+
+If you encounter an issue not listed here:
+
+1. **Check GitHub Issues**: https://github.com/ShunsukeHayashi/test_miyabi/issues
+2. **Enable Debug Logging**: Set `DEBUG=*` environment variable
+3. **Run Diagnostics**:
+   ```bash
+   npm run verify  # Runs system checks
+   ```
+4. **Collect Logs**:
+   ```bash
+   # Agent logs
+   npm run agents:parallel:exec -- --issue 59 --log-level debug > agent.log 2>&1
+
+   # Web app logs
+   cd web && npm run dev > server.log 2>&1
+   ```
+5. **Create Issue**: Include logs, environment details, and reproduction steps
 
 ## 📄 License
 

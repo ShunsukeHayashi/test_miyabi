@@ -31,11 +31,18 @@ const nextConfig = {
         hostname: '**',
       },
     ],
+    formats: ['image/webp', 'image/avif'],
   },
   // Enable experimental features for better performance
   experimental: {
-    optimizePackageImports: ['@/lib', '@/components'],
+    optimizePackageImports: ['@/lib', '@/components', 'lucide-react', '@radix-ui/react-icons'],
   },
+  // Performance optimizations
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  // Output file tracing root
+  outputFileTracingRoot: process.env.OUTPUT_FILE_TRACING_ROOT,
 };
 
 export default nextConfig;
