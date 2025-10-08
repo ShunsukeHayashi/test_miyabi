@@ -6,6 +6,8 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+
+  // Performance: Image Optimization
   images: {
     remotePatterns: [
       // BytePlus CDN domains
@@ -31,10 +33,37 @@ const nextConfig = {
         hostname: '**',
       },
     ],
+    formats: ['image/avif', 'image/webp'], // Modern formats for better compression
+    minimumCacheTTL: 31536000, // Cache optimized images for 1 year
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840], // Responsive image sizes
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384], // Thumbnail sizes
   },
-  // Enable experimental features for better performance
+
+  // Performance: Compression
+  compress: true, // Enable gzip compression
+
+  // Performance: Production Optimizations
+  productionBrowserSourceMaps: false, // Disable source maps in production for smaller bundles
+  poweredByHeader: false, // Remove X-Powered-By header for security
+
+  // Performance: React optimizations
+  reactStrictMode: true,
+  swcMinify: true, // Use SWC for faster minification
+
+  // Performance: Package optimization
   experimental: {
-    optimizePackageImports: ['@/lib', '@/components'],
+    optimizePackageImports: ['@/lib', '@/components', 'lucide-react', 'date-fns'],
+    webVitalsAttribution: ['CLS', 'LCP'], // Track performance metrics
+  },
+
+  // Performance: Output optimization
+  output: 'standalone', // Optimize output for Docker/serverless
+
+  // Performance: Compiler options
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'], // Remove console.log in production, keep errors/warnings
+    } : false,
   },
 };
 
