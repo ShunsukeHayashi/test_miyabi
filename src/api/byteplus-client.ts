@@ -245,6 +245,18 @@ export class BytePlusClient {
    * Validate image generation request
    */
   private validateImageRequest(request: ImageGenerationRequest): void {
+    if (!request.model) {
+      throw new Error('Model is required');
+    }
+
+    // Image-to-image models require input image
+    if (
+      request.model === 'Bytedance-SeedEdit-3.0-i2i' &&
+      (!request.image || request.image.length === 0)
+    ) {
+      throw new Error('Image input is required for i2i models');
+    }
+
     if (!request.prompt || request.prompt.trim().length === 0) {
       throw new Error('Prompt is required');
     }
@@ -253,74 +265,78 @@ export class BytePlusClient {
       throw new Error('Prompt must be less than 2000 characters');
     }
 
-    if (request.width && (request.width < 64 || request.width > 4096)) {
-      throw new Error('Width must be between 64 and 4096 pixels');
-    }
-
-    if (request.height && (request.height < 64 || request.height > 4096)) {
-      throw new Error('Height must be between 64 and 4096 pixels');
-    }
-
     if (
-      request.guidanceScale &&
-      (request.guidanceScale < 1.0 || request.guidanceScale > 20.0)
+      request.sequential_image_generation_options?.max_images &&
+      (request.sequential_image_generation_options.max_images < 1 ||
+        request.sequential_image_generation_options.max_images > 10)
     ) {
-      throw new Error('Guidance scale must be between 1.0 and 20.0');
-    }
-
-    if (request.steps && (request.steps < 10 || request.steps > 100)) {
-      throw new Error('Steps must be between 10 and 100');
-    }
-
-    if (request.count && (request.count < 1 || request.count > 4)) {
-      throw new Error('Count must be between 1 and 4');
+      throw new Error('max_images must be between 1 and 10');
     }
   }
 
   /**
-   * Generate image using specified model
+   * Generate image using BytePlus API v3
    *
-   * @param model - Image generation model ('seeddream' or 'seeddream4')
-   * @param request - Image generation parameters
-   * @returns Generated image response with URL and metadata
+   * @param request - Image generation parameters including model
+   * @returns Generated image response with URLs and metadata
    *
-   * @example
+   * @example Text-to-Image (t2i)
    * ```typescript
-   * const result = await client.generateImage('seeddream4', {
+   * const result = await client.generateImage({
+   *   model: 'seedream-4-0-250828',
    *   prompt: 'A sunset over mountains, photorealistic',
-   *   negativePrompt: 'blurry, low quality',
-   *   width: 1024,
-   *   height: 1024,
-   *   style: 'Photorealistic',
-   *   seed: 42
+   *   size: '2K',
+   *   response_format: 'url',
+   *   watermark: true
    * });
    *
-   * console.log(`Image URL: ${result.imageUrl}`);
-   * console.log(`Seed: ${result.seed}`);
+   * console.log(`Image URL: ${result.data[0].url}`);
+   * ```
+   *
+   * @example Image-to-Image (i2i)
+   * ```typescript
+   * const result = await client.generateImage({
+   *   model: 'Bytedance-SeedEdit-3.0-i2i',
+   *   prompt: 'Add a rainbow in the sky',
+   *   image: ['https://example.com/source.jpg'],
+   *   size: '2K',
+   *   response_format: 'url'
+   * });
+   *
+   * console.log(`Edited image: ${result.data[0].url}`);
    * ```
    */
   async generateImage(
-    model: ImageGenerationModel,
     request: ImageGenerationRequest
   ): Promise<ImageGenerationResponse> {
     this.validateImageRequest(request);
 
     const startTime = Date.now();
 
+    // BytePlus API v3 uses a single endpoint for all models
+    // Build request body without undefined fields
+    const requestBody: Record<string, unknown> = {
+      model: request.model,
+      prompt: request.prompt,
+      response_format: request.response_format ?? 'url',
+      size: request.size ?? '1K',
+      stream: request.stream ?? false,
+      watermark: request.watermark ?? true,
+    };
+
+    // Add optional fields only if defined
+    if (request.image) requestBody.image = request.image;
+    if (request.sequential_image_generation)
+      requestBody.sequential_image_generation = request.sequential_image_generation;
+    if (request.sequential_image_generation_options)
+      requestBody.sequential_image_generation_options =
+        request.sequential_image_generation_options;
+    if (request.seed !== undefined) requestBody.seed = request.seed;
+
     const response = await this.makeRequest<ImageGenerationResponse>(
-      `/${model}/generate`,
+      '',
       'POST',
-      {
-        prompt: request.prompt,
-        negative_prompt: request.negativePrompt,
-        width: request.width ?? 1024,
-        height: request.height ?? 1024,
-        style: request.style,
-        seed: request.seed,
-        guidance_scale: request.guidanceScale ?? 7.5,
-        steps: request.steps ?? 50,
-        count: request.count ?? 1,
-      }
+      requestBody
     );
 
     const generationTime = Date.now() - startTime;
@@ -328,33 +344,107 @@ export class BytePlusClient {
     return {
       ...response,
       metadata: {
-        ...response.metadata,
+        model: request.model,
+        prompt: request.prompt,
         generationTime,
+        dimensions: { width: 1024, height: 1024 }, // Size mapping needed
+        seed: request.seed,
       },
     };
   }
 
   /**
-   * Generate dance video using SEEDDANCE model
+   * Generate video from image using i2v model (image-to-video)
    *
    * @param request - Video generation parameters
-   * @returns Generated video response with URL and metadata
+   * @returns Generated video response with URLs and metadata
    *
    * @example
    * ```typescript
-   * const result = await client.generateDanceVideo({
-   *   sourceImage: './character.png',
-   *   danceStyle: 'hip-hop',
-   *   duration: 10,
-   *   quality: 'high'
+   * const result = await client.generateVideo({
+   *   model: 'Bytedance-Seedance-1.0-pro',
+   *   image: 'https://example.com/source.jpg',
+   *   prompt: 'Dynamic camera movement, cinematic style',
+   *   resolution: '1080P',
+   *   ratio: '16:9',
+   *   duration: 5,
+   *   quantity: 1,
+   *   fixed_lens: false,
+   *   watermark: true,
+   *   seed: 42
    * });
    *
-   * console.log(`Video URL: ${result.videoUrl}`);
+   * console.log(`Video URL: ${result.data[0].url}`);
    * ```
    */
-  async generateDanceVideo(
+  async generateVideo(
     request: VideoGenerationRequest
   ): Promise<VideoGenerationResponse> {
+    if (!request.model) {
+      throw new Error('Model is required');
+    }
+
+    if (!request.image) {
+      throw new Error('Source image is required for i2v generation');
+    }
+
+    if (request.duration && request.duration !== 5 && request.duration !== 10) {
+      throw new Error('Duration must be 5 or 10 seconds');
+    }
+
+    if (request.quantity && (request.quantity < 1 || request.quantity > 4)) {
+      throw new Error('Quantity must be between 1 and 4');
+    }
+
+    const startTime = Date.now();
+
+    // Build request body
+    const requestBody: Record<string, unknown> = {
+      model: request.model,
+      image: request.image,
+      resolution: request.resolution ?? '1080P',
+      ratio: request.ratio ?? 'Auto',
+      duration: request.duration ?? 5,
+      quantity: request.quantity ?? 1,
+      watermark: request.watermark ?? true,
+    };
+
+    if (request.prompt) requestBody.prompt = request.prompt;
+    if (request.fixed_lens !== undefined) requestBody.fixed_lens = request.fixed_lens;
+    if (request.seed !== undefined) requestBody.seed = request.seed;
+
+    const response = await this.makeRequest<VideoGenerationResponse>(
+      '/videos/generations',
+      'POST',
+      requestBody
+    );
+
+    const generationTime = Date.now() - startTime;
+
+    return {
+      ...response,
+      metadata: {
+        model: request.model,
+        danceStyle: 'i2v',
+        generationTime,
+        duration: request.duration ?? 5,
+        dimensions: { width: 1920, height: 1080 },
+        fps: 30,
+        seed: request.seed ?? -1,
+      },
+    };
+  }
+
+  /**
+   * Generate dance video using legacy SEEDDANCE model
+   * @deprecated Use generateVideo() with Bytedance-Seedance-1.0-pro instead
+   *
+   * @param request - Legacy video generation parameters
+   * @returns Generated video response
+   */
+  async generateDanceVideo(
+    request: import('../types/byteplus.js').LegacyVideoGenerationRequest
+  ): Promise<import('../types/byteplus.js').LegacyVideoGenerationResponse> {
     if (!request.sourceImage) {
       throw new Error('Source image is required');
     }
@@ -365,7 +455,7 @@ export class BytePlusClient {
 
     const startTime = Date.now();
 
-    const response = await this.makeRequest<VideoGenerationResponse>(
+    const response = await this.makeRequest<any>(
       '/seeddance/generate',
       'POST',
       {
@@ -381,10 +471,17 @@ export class BytePlusClient {
     const generationTime = Date.now() - startTime;
 
     return {
-      ...response,
+      videoUrl: response.videoUrl ?? response.data?.[0]?.url ?? '',
+      seed: response.seed ?? request.seed ?? -1,
+      thumbnailUrl: response.thumbnailUrl ?? response.data?.[0]?.thumbnail_url ?? '',
       metadata: {
-        ...response.metadata,
+        model: 'seeddance',
+        danceStyle: request.danceStyle,
         generationTime,
+        duration: request.duration ?? 10,
+        dimensions: { width: 1080, height: 1920 },
+        fps: 30,
+        seed: response.seed ?? request.seed ?? -1,
       },
     };
   }
@@ -404,9 +501,9 @@ export class BytePlusClient {
    *     'A forest in autumn'
    *   ],
    *   sharedParams: {
-   *     width: 1024,
-   *     height: 1024,
-   *     style: 'Photorealistic'
+   *     model: 'seedream-4-0-250828',
+   *     size: '2K',
+   *     watermark: true
    *   },
    *   maxConcurrency: 3
    * });
@@ -423,6 +520,11 @@ export class BytePlusClient {
       throw new Error('At least one prompt is required');
     }
 
+    // Ensure model is specified
+    if (!sharedParams.model) {
+      throw new Error('Model must be specified in sharedParams');
+    }
+
     const startTime = Date.now();
     const successful: ImageGenerationResponse[] = [];
     const failed: Array<{ prompt: string; error: string }> = [];
@@ -432,8 +534,9 @@ export class BytePlusClient {
       const chunk = prompts.slice(i, i + maxConcurrency);
       const promises = chunk.map(async (prompt) => {
         try {
-          const result = await this.generateImage('seeddream4', {
+          const result = await this.generateImage({
             ...sharedParams,
+            model: sharedParams.model!,
             prompt,
           });
           successful.push(result);
@@ -467,15 +570,22 @@ export class BytePlusClient {
   }
 
   /**
-   * Check API health
+   * Check API health by attempting a minimal request
+   * Note: BytePlus API v3 does not have a dedicated health endpoint
    *
-   * @returns True if API is healthy
+   * @returns True if API is accessible
    */
   async checkHealth(): Promise<boolean> {
     try {
-      await this.makeRequest<{ status: string }>('/health', 'GET');
+      // Test with a minimal image generation request
+      await this.generateImage({
+        model: 'seedream-4-0-250828',
+        prompt: 'test',
+        size: '1K',
+      });
       return true;
-    } catch {
+    } catch (error) {
+      this.log('Health check failed', error);
       return false;
     }
   }
