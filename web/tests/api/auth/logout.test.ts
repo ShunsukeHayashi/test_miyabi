@@ -8,10 +8,12 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { POST } from '@/app/api/auth/logout/route';
 import { NextRequest } from 'next/server';
 
-// Mock Prisma Client
-const mockPrismaSession = {
-  deleteMany: vi.fn(),
-};
+// Hoist mock constants before vi.mock() is called
+const { mockPrismaSession } = vi.hoisted(() => ({
+  mockPrismaSession: {
+    deleteMany: vi.fn(),
+  },
+}));
 
 vi.mock('@/generated/prisma', () => ({
   PrismaClient: vi.fn(() => ({
@@ -24,6 +26,7 @@ vi.mock('@/generated/prisma', () => ({
 vi.mock('@/lib/auth/jwt', () => ({
   JWTService: {
     getCurrentUser: vi.fn(),
+    clearAuthCookies: vi.fn(() => Promise.resolve()),
   },
 }));
 

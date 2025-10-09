@@ -61,7 +61,7 @@ export type ResponseFormat = 'url' | 'base64';
 /**
  * Sequential image generation mode
  */
-export type SequentialGenerationMode = 'auto' | 'manual';
+export type SequentialGenerationMode = 'auto' | 'disabled';
 
 /**
  * Sequential image generation options

@@ -334,7 +334,7 @@ export class BytePlusClient {
     if (request.seed !== undefined) requestBody.seed = request.seed;
 
     const response = await this.makeRequest<ImageGenerationResponse>(
-      '',
+      '/images/generations',
       'POST',
       requestBody
     );

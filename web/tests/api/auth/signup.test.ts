@@ -8,11 +8,13 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { POST } from '@/app/api/auth/signup/route';
 import { NextRequest } from 'next/server';
 
-// Mock Prisma Client
-const mockPrismaUser = {
-  findUnique: vi.fn(),
-  create: vi.fn(),
-};
+// Hoist mock constants before vi.mock() is called
+const { mockPrismaUser } = vi.hoisted(() => ({
+  mockPrismaUser: {
+    findUnique: vi.fn(),
+    create: vi.fn(),
+  },
+}));
 
 vi.mock('@/generated/prisma', () => ({
   PrismaClient: vi.fn(() => ({

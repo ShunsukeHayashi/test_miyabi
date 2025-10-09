@@ -49,10 +49,10 @@ describe('Generation Store', () => {
         prompt: 'Test prompt',
         url: 'https://example.com/image.png',
       })
-      generationId = result.current.history[0].id
     })
 
     expect(result.current.history).toHaveLength(1)
+    generationId = result.current.history[0].id
 
     act(() => {
       result.current.removeGeneration(generationId)
@@ -73,10 +73,10 @@ describe('Generation Store', () => {
         prompt: 'Test prompt',
         url: 'https://example.com/image.png',
       })
-      generationId = result.current.history[0].id
     })
 
     expect(result.current.favorites).toHaveLength(0)
+    generationId = result.current.history[0].id
 
     act(() => {
       result.current.toggleFavorite(generationId)
