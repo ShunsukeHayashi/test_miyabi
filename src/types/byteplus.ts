@@ -171,7 +171,9 @@ export interface ImageGenerationResponse {
 /**
  * Supported video generation models
  */
-export type VideoGenerationModel = 'Bytedance-Seedance-1.0-pro';
+export type VideoGenerationModel =
+  | 'Bytedance-Seedance-1.0-pro'
+  | 'seedance-1-0-pro-250528';
 
 /**
  * Video resolution options
@@ -495,4 +497,125 @@ export interface PromptOptimizationResponse {
 
   /** Tokens used */
   tokensUsed: number;
+}
+
+/**
+ * Task-based API content types
+ */
+export type TaskContentType = 'text' | 'image_url';
+
+/**
+ * Task status for async operations
+ */
+export type TaskStatus = 'pending' | 'processing' | 'succeeded' | 'failed';
+
+/**
+ * Text content for task-based API
+ */
+export interface TextContent {
+  type: 'text';
+  text: string;
+}
+
+/**
+ * Image URL content for task-based API
+ */
+export interface ImageURLContent {
+  type: 'image_url';
+  image_url: {
+    url: string;
+  };
+}
+
+/**
+ * Content union type
+ */
+export type TaskContent = TextContent | ImageURLContent;
+
+/**
+ * Task creation request (New BytePlus SDK v2)
+ */
+export interface TaskCreationRequest {
+  /** Model name */
+  model: VideoGenerationModel;
+
+  /** Content array (text prompt + image) */
+  content: TaskContent[];
+}
+
+/**
+ * Task creation response
+ */
+export interface TaskCreationResponse {
+  /** Task ID for polling */
+  id: string;
+
+  /** Creation timestamp */
+  created?: number;
+}
+
+/**
+ * Task status response
+ */
+export interface TaskStatusResponse {
+  /** Task ID */
+  id: string;
+
+  /** Model name */
+  model: string;
+
+  /** Current status */
+  status: TaskStatus;
+
+  /** Generated video content (if succeeded) */
+  content?: {
+    video_url: string;
+  };
+
+  /** Usage statistics */
+  usage?: {
+    completion_tokens: number;
+    total_tokens: number;
+  };
+
+  /** Error information (if failed) */
+  error?: {
+    code: string;
+    message: string;
+  };
+
+  /** Creation timestamp */
+  created_at: number;
+
+  /** Update timestamp */
+  updated_at: number;
+
+  /** Seed used for generation */
+  seed?: number;
+
+  /** Video resolution */
+  resolution?: string;
+
+  /** Video duration in seconds */
+  duration?: number;
+
+  /** Video aspect ratio */
+  ratio?: string;
+
+  /** Frames per second */
+  framespersecond?: number;
+}
+
+/**
+ * Video generation options for prompt text
+ */
+export interface VideoPromptOptions {
+  /** Video resolution */
+  resolution?: '480p' | '720p' | '1080p';
+
+  /** Video duration in seconds */
+  duration?: 5 | 10;
+
+  /** Camera fixed mode */
+  camerafixed?: boolean;
 }

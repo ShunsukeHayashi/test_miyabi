@@ -1,0 +1,71 @@
+{
+  "timestamp": "2025-10-09T08:20:58.856Z",
+  "summary": {
+    "totalTests": 6,
+    "successful": 0,
+    "failed": 6,
+    "successRate": 0
+  },
+  "results": [
+    {
+      "testName": "Simple Subject - Single Person",
+      "prompt": "An elderly woman playing video games enthusiastically, smooth camera pan from left to right, cozy living room with warm lighting, cinematic style",
+      "expectedOutcome": "success",
+      "actualOutcome": "failure",
+      "success": false,
+      "generationTime": 0,
+      "error": "Source image is required for i2v generation",
+      "notes": "Single subject + dynamic camera (best practice)"
+    },
+    {
+      "testName": "Product Showcase",
+      "prompt": "A luxury watch rotating on display stand, white studio background with soft shadows, commercial photography style, professional lighting",
+      "expectedOutcome": "success",
+      "actualOutcome": "failure",
+      "success": false,
+      "generationTime": 0,
+      "error": "Source image is required for i2v generation",
+      "notes": "Fixed subject + simple rotation"
+    },
+    {
+      "testName": "Nature Scene - Landscape",
+      "prompt": "Scenic mountain landscape at sunset, slow zoom out revealing valley below, golden hour lighting, aerial drone shot, cinematic 4K quality",
+      "expectedOutcome": "unknown",
+      "actualOutcome": "failure",
+      "success": false,
+      "generationTime": 0,
+      "error": "Source image is required for i2v generation",
+      "notes": "Complex scene with camera movement"
+    },
+    {
+      "testName": "Multiple Subjects (Known Issue)",
+      "prompt": "Elderly woman and young child playing video games together, laughing and smiling, living room setting, warm lighting",
+      "expectedOutcome": "failure",
+      "actualOutcome": "failure",
+      "success": false,
+      "generationTime": 0,
+      "error": "Source image is required for i2v generation",
+      "notes": "Multiple subjects - 80% failure rate from analysis"
+    },
+    {
+      "testName": "Action Scene - High Motion",
+      "prompt": "Runner jogging through city park, camera follows from side, morning sunlight through trees, dynamic handheld camera movement",
+      "expectedOutcome": "unknown",
+      "actualOutcome": "failure",
+      "success": false,
+      "generationTime": 0,
+      "error": "Source image is required for i2v generation",
+      "notes": "High motion + follow camera"
+    },
+    {
+      "testName": "Abstract Animation",
+      "prompt": "Colorful abstract shapes morphing and flowing, smooth transitions, vibrant gradients, psychedelic style, looping animation",
+      "expectedOutcome": "unknown",
+      "actualOutcome": "failure",
+      "success": false,
+      "generationTime": 0,
+      "error": "Source image is required for i2v generation",
+      "notes": "Abstract content - no human subjects"
+    }
+  ]
+}

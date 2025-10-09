@@ -181,7 +181,8 @@ export class BytePlusAI {
    *
    * @example
    * ```typescript
-   * const result = await ai.generateVideo(
+   * // Legacy API (Bytedance-Seedance-1.0-pro)
+   * const result1 = await ai.generateVideo(
    *   {
    *     model: 'Bytedance-Seedance-1.0-pro',
    *     image: 'https://example.com/source.jpg',
@@ -191,10 +192,25 @@ export class BytePlusAI {
    *   },
    *   { optimizePrompt: true }
    * );
+   *
+   * // New task-based API (seedance-1-0-pro-250528)
+   * const result2 = await ai.generateVideo(
+   *   {
+   *     model: 'seedance-1-0-pro-250528',
+   *     image: 'https://example.com/source.jpg',
+   *     prompt: 'Dynamic camera movement, cinematic style',
+   *     duration: 5,
+   *     camerafixed: false
+   *   },
+   *   { optimizePrompt: true }
+   * );
    * ```
    */
   async generateVideo(
-    request: VideoGenerationRequest,
+    request: VideoGenerationRequest & {
+      resolution?: '480p' | '720p' | '1080p';
+      camerafixed?: boolean;
+    },
     options?: AIGenerationOptions
   ): Promise<VideoGenerationResponse> {
     let finalRequest = { ...request };
@@ -215,6 +231,12 @@ export class BytePlusAI {
       }
     }
 
+    // Use new task-based API for seedance-1-0-pro-250528
+    if (request.model === 'seedance-1-0-pro-250528') {
+      return this.imageClient.generateVideoWithPolling(finalRequest);
+    }
+
+    // Legacy API for Bytedance-Seedance-1.0-pro
     return this.imageClient.generateVideo(finalRequest);
   }
 

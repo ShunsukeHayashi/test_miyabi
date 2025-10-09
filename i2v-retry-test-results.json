@@ -1,0 +1,28 @@
+{
+  "timestamp": "2025-10-09T07:26:36.244Z",
+  "results": [
+    {
+      "name": "Test 1: Minimal (10s, 720P, 16:9)",
+      "success": false
+    },
+    {
+      "name": "Test 2: With prompt (10s, 720P, 16:9)",
+      "success": false
+    },
+    {
+      "name": "Test 3: 1080P quality (10s, 16:9)",
+      "success": false
+    },
+    {
+      "name": "Test 4: TikTok format (5s, 1080P, 9:16)",
+      "success": false
+    },
+    {
+      "name": "Test 5: Full production (5s, 1080P, 9:16, fixed_lens)",
+      "success": false
+    }
+  ],
+  "successCount": 0,
+  "totalTests": 5,
+  "apiWorking": false
+}
