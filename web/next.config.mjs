@@ -45,18 +45,19 @@ const nextConfig = {
 
   // Performance: React optimizations
   reactStrictMode: true,
-  swcMinify: true, // Use SWC for faster minification
 
   // Performance: Package optimization
   experimental: {
     optimizePackageImports: ['@/lib', '@/components', 'lucide-react', '@radix-ui/react-icons'],
   },
+
   // Performance optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  // Output file tracing root
-  outputFileTracingRoot: process.env.OUTPUT_FILE_TRACING_ROOT,
+
+  // Output file tracing root (fix workspace detection warning)
+  output: 'standalone',
 };
 
 export default nextConfig;
