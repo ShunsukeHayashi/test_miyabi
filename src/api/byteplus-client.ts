@@ -590,4 +590,200 @@ export class BytePlusClient {
       return false;
     }
   }
+
+  /**
+   * Create a video generation task (New BytePlus SDK v2 API)
+   *
+   * @param request - Task creation request
+   * @returns Task creation response with task ID
+   *
+   * @example
+   * ```typescript
+   * const task = await client.createVideoTask({
+   *   model: 'seedance-1-0-pro-250528',
+   *   content: [
+   *     {
+   *       type: 'text',
+   *       text: 'Dynamic camera movement --resolution 1080p --duration 5 --camerafixed false'
+   *     },
+   *     {
+   *       type: 'image_url',
+   *       image_url: { url: 'https://example.com/image.jpg' }
+   *     }
+   *   ]
+   * });
+   *
+   * console.log(`Task created: ${task.id}`);
+   * ```
+   */
+  async createVideoTask(
+    request: import('../types/byteplus.js').TaskCreationRequest
+  ): Promise<import('../types/byteplus.js').TaskCreationResponse> {
+    if (!request.model) {
+      throw new Error('Model is required');
+    }
+
+    if (!request.content || request.content.length === 0) {
+      throw new Error('Content array is required');
+    }
+
+    this.log('Creating video generation task', { model: request.model });
+
+    return this.makeRequest<import('../types/byteplus.js').TaskCreationResponse>(
+      '/contents/generations/tasks',
+      'POST',
+      request
+    );
+  }
+
+  /**
+   * Get video generation task status (Polling)
+   *
+   * @param taskId - Task ID returned from createVideoTask
+   * @returns Task status response
+   *
+   * @example
+   * ```typescript
+   * const status = await client.getTaskStatus(taskId);
+   *
+   * if (status.status === 'succeeded') {
+   *   console.log(`Video URL: ${status.data![0].url}`);
+   * } else if (status.status === 'failed') {
+   *   console.error(`Error: ${status.error!.message}`);
+   * }
+   * ```
+   */
+  async getTaskStatus(
+    taskId: string
+  ): Promise<import('../types/byteplus.js').TaskStatusResponse> {
+    if (!taskId) {
+      throw new Error('Task ID is required');
+    }
+
+    return this.makeRequest<import('../types/byteplus.js').TaskStatusResponse>(
+      `/contents/generations/tasks/${taskId}`,
+      'GET'
+    );
+  }
+
+  /**
+   * Generate video with automatic polling (High-level wrapper)
+   *
+   * @param request - Video generation request
+   * @param options - Polling options
+   * @returns Video generation response
+   *
+   * @example
+   * ```typescript
+   * const result = await client.generateVideoWithPolling({
+   *   model: 'seedance-1-0-pro-250528',
+   *   image: 'https://example.com/image.jpg',
+   *   prompt: 'Dynamic camera movement, cinematic style',
+   *   resolution: '1080p',
+   *   duration: 5,
+   *   camerafixed: false
+   * });
+   *
+   * console.log(`Video URL: ${result.data[0].url}`);
+   * ```
+   */
+  async generateVideoWithPolling(
+    request: import('../types/byteplus.js').VideoGenerationRequest & {
+      resolution?: '480p' | '720p' | '1080p';
+      camerafixed?: boolean;
+    },
+    options: {
+      pollingInterval?: number;
+      maxPollingTime?: number;
+    } = {}
+  ): Promise<import('../types/byteplus.js').VideoGenerationResponse> {
+    const { pollingInterval = 1000, maxPollingTime = 300000 } = options;
+
+    // Build prompt with flags
+    const promptParts: string[] = [];
+    if (request.prompt) promptParts.push(request.prompt);
+
+    const resolution = request.resolution || '1080p';
+    promptParts.push(`--resolution ${resolution}`);
+
+    if (request.duration) promptParts.push(`--duration ${request.duration}`);
+
+    const camerafixed = request.camerafixed ?? false;
+    promptParts.push(`--camerafixed ${camerafixed}`);
+
+    const promptText = promptParts.join(' ');
+
+    // Create task
+    this.log('Creating video generation task with polling', {
+      prompt: promptText,
+      image: request.image,
+    });
+
+    const task = await this.createVideoTask({
+      model: request.model,
+      content: [
+        {
+          type: 'text',
+          text: promptText,
+        },
+        {
+          type: 'image_url',
+          image_url: { url: request.image },
+        },
+      ],
+    });
+
+    this.log(`Task created: ${task.id}, starting polling...`);
+
+    // Poll until completion
+    const startTime = Date.now();
+    while (true) {
+      const elapsed = Date.now() - startTime;
+      if (elapsed > maxPollingTime) {
+        throw new Error(
+          `Video generation timeout after ${maxPollingTime}ms`
+        );
+      }
+
+      const status = await this.getTaskStatus(task.id);
+      this.log(`Task status: ${status.status}`);
+
+      if (status.status === 'succeeded') {
+        if (!status.content?.video_url) {
+          throw new Error('No video URL in succeeded response');
+        }
+
+        return {
+          data: [
+            {
+              url: status.content.video_url,
+              duration: status.duration,
+            },
+          ],
+          seed: status.seed,
+          metadata: {
+            model: request.model,
+            danceStyle: 'i2v',
+            generationTime: elapsed,
+            duration: status.duration ?? request.duration ?? 5,
+            dimensions: { width: 1920, height: 1080 },
+            fps: status.framespersecond ?? 24,
+            seed: status.seed ?? request.seed ?? -1,
+          },
+        };
+      }
+
+      if (status.status === 'failed') {
+        throw new BytePlusAPIError(
+          status.error?.message || 'Video generation failed',
+          500,
+          status.error?.code,
+          task.id
+        );
+      }
+
+      // Wait before next poll
+      await new Promise((resolve) => setTimeout(resolve, pollingInterval));
+    }
+  }
 }
