@@ -1,0 +1,166 @@
+{
+  "version": "v3",
+  "title": "Gamer Grandma Rage Mode",
+  "duration": 20,
+  "fps": 30,
+  "resolution": "1080p",
+  "aspect_ratio": "9:16",
+
+  "scenes": [
+    {
+      "scene_id": 1,
+      "timing": "0-2s",
+      "purpose": "Hook - Peaceful Grandma",
+      "visual_prompt": "A cozy Japanese living room, soft afternoon light streaming through shoji screens. An elderly Japanese woman (70s) with gentle smile and reading glasses, wearing a traditional cardigan, sitting peacefully on a zabuton cushion. She's knitting a colorful scarf with bamboo needles, her movements slow and graceful. A teacup and traditional sweets on a low table beside her. Warm, nostalgic atmosphere. Shot with smartphone camera held steady, natural lighting, 9:16 vertical format.",
+      "camera_movement": "Slow gentle zoom in on grandma's peaceful face",
+      "audio_description": "Soft traditional Japanese music, quiet knitting sounds",
+      "dialogue_romaji": "A-ra, ko-n-ni-chi-wa. Wa-ta-shi wa a-mi-mo-no ga da-i-su-ki de-su-yo.",
+      "dialogue_japanese": "あら、こんにちは。私は編み物が大好きですよ。",
+      "dialogue_english": "Oh, hello. I love knitting.",
+      "emotion": "Peaceful, warm, grandmotherly",
+      "text_overlay": "うちのおばあちゃん、趣味は編み物です😊",
+      "text_position": "top_third"
+    },
+
+    {
+      "scene_id": 2,
+      "timing": "2-3s",
+      "purpose": "Transition - The Transformation",
+      "visual_prompt": "Sudden cut to the same grandma, but now her expression has completely changed. She's wearing a professional RGB gaming headset with glowing lights. Her eyes are sharp and focused, staring intensely at a large gaming monitor showing Apex Legends gameplay. The room lighting has shifted to dramatic blue and purple gaming RGB lights. Her posture is forward, aggressive, hands gripping a gaming controller tightly. The peaceful atmosphere is completely gone, replaced by intense gamer energy. Smartphone POV camera, dynamic angle.",
+      "camera_movement": "Quick snap zoom to her intense face",
+      "audio_description": "Sudden shift to intense gaming music, keyboard clicking sounds",
+      "dialogue_romaji": "Yo-o-shi! I-ku-zo-o-o!",
+      "dialogue_japanese": "よーし！行くぞぉぉ！",
+      "dialogue_english": "Alright! Let's go!",
+      "emotion": "Intense focus, competitive fire",
+      "text_overlay": "!?",
+      "text_position": "center"
+    },
+
+    {
+      "scene_id": 3,
+      "timing": "3-7s",
+      "purpose": "Development - Gamer Mode Activated",
+      "visual_prompt": "Close-up of grandma's face illuminated by the monitor's glow, her expression fierce and concentrated. She's leaning forward aggressively, eyes tracking enemies on screen. Her wrinkled hands are moving rapidly on the controller. The RGB headset lights pulse with the game action. Monitor reflection visible in her glasses showing intense FPS combat. Sweat on her forehead, veins visible on her temple from concentration. Background shows gaming setup: energy drink cans, gaming chair, LED strips. Authentic smartphone recording quality with slight hand shake for realism.",
+      "camera_movement": "Tight close-up on face, slight handheld shake",
+      "audio_description": "Intense game sounds: gunfire, explosions, footsteps",
+      "dialogue_romaji": "Ko-no wa-ka-zo-o ga-a-a! O-ma-e no u-go-ki wa mi-e-mi-e na-n-da-yo-o!",
+      "dialogue_japanese": "この若造がぁぁ！お前の動きは見え見えなんだよぉ！",
+      "dialogue_english": "You young punk! I can see all your moves!",
+      "emotion": "Aggressive, trash-talking, competitive",
+      "text_overlay": "※普段は優しいおばあちゃんです",
+      "text_position": "bottom_third"
+    },
+
+    {
+      "scene_id": 4,
+      "timing": "7-11s",
+      "purpose": "Climax - Epic Gamer Moment",
+      "visual_prompt": "Grandma suddenly stands up from her gaming chair in excitement, controller still in hands, headset slightly askew. Her face shows pure gaming euphoria - eyes wide, mouth open in a victorious shout. The monitor behind her displays 'SQUAD ELIMINATED' with kill feed scrolling. RGB lights flashing victory colors. She's making triumphant gestures, pumping her fist in the air. The gaming setup around her shows multiple monitors, mechanical keyboard with rainbow backlighting, gaming mouse with customizable weights. Energy drink cans scattered around. Smartphone camera captures the full body shot, vertical 9:16 format, natural handheld movement.",
+      "camera_movement": "Pull back to full body shot, slight tilt up following her standing motion",
+      "audio_description": "Victory sound effects, crowd cheering sounds from game",
+      "dialogue_romaji": "Mi-ta-ka-a-a! Wa-shi no ji-tsu-ryo-ku wo-o-o! He-ddo-sho-tto ki-me-ta-ze-e-e!",
+      "dialogue_japanese": "見たかぁぁ！ワシの実力をぉぉ！ヘッドショット決めたぜぇぇ！",
+      "dialogue_english": "Did you see that!? That's my skill! Headshot!",
+      "emotion": "Triumphant, proud, excited",
+      "text_overlay": "🎯 HEADSHOT! 🎯",
+      "text_position": "top_third"
+    },
+
+    {
+      "scene_id": 5,
+      "timing": "11-15s",
+      "purpose": "Peak Comedy - More Trash Talk",
+      "visual_prompt": "Grandma back in gaming chair, now even more animated. She's leaning into the microphone boom arm attached to her desk, trash-talking into it while playing. Her face shows a mix of concentration and savage glee. One hand on controller, other hand gesturing aggressively at the screen. The gaming monitor shows intense 1v1 combat. Her traditional cardigan is now slightly disheveled, reading glasses pushed up on her head. Gaming peripherals all around: RGB mouse pad, vertical monitor for Discord, mechanical keyboard with artisan keycaps. The contrast between her elderly appearance and hardcore gamer setup is striking. Smartphone camera angle from side, capturing both her and the gaming setup.",
+      "camera_movement": "Side angle, slight pan following her gestures",
+      "audio_description": "Intense gunfire, mechanical keyboard clicks, her aggressive breathing",
+      "dialogue_romaji": "I-ma no ra-gu su-gi da-ro-o-o! Sa-a-ba-a ga wa-ru-i-n-ja-na-i-no-ka-a!? Tsu-gi wa ma-ke-na-i-zo-o!",
+      "dialogue_japanese": "今のラグすぎだろぉぉ！サーバーが悪いんじゃないのかぁ！？次は負けないぞぉ！",
+      "dialogue_english": "That lag was ridiculous! The server must be bad! I won't lose next time!",
+      "emotion": "Frustrated but determined, classic gamer rage",
+      "text_overlay": "Ping: 999ms",
+      "text_position": "top_third"
+    },
+
+    {
+      "scene_id": 6,
+      "timing": "15-17s",
+      "purpose": "Resolution Setup - Game Ends",
+      "visual_prompt": "The gaming monitor displays 'VICTORY' or 'DEFEAT' screen (can be either for comedy). Grandma removes her RGB headset slowly, her intense gamer expression starting to soften. She's taking a deep breath, shoulders relaxing. The RGB lights in the room begin to fade to normal warm lighting. She's setting the controller down gently on her gaming desk mat. Her reflection in the dark monitor shows her transitioning back to normal grandma mode. The gaming setup is still visible: mechanical keyboard, gaming mouse, multiple monitors, but she's no longer in battle mode. Smartphone camera begins to pull back slightly.",
+      "camera_movement": "Slow zoom out from close-up to medium shot",
+      "audio_description": "Game ending music, victory or defeat sound, her exhaling",
+      "dialogue_romaji": "Fu-u-u... O-wa-tta-a. Tsu-ka-re-ta-a.",
+      "dialogue_japanese": "ふぅぅぅ...終わったぁ。疲れたぁ。",
+      "dialogue_english": "Phew... It's over. I'm exhausted.",
+      "emotion": "Relief, exhaustion, transitioning to calm",
+      "text_overlay": "",
+      "text_position": ""
+    },
+
+    {
+      "scene_id": 7,
+      "timing": "17-20s",
+      "purpose": "Outro - Back to Normal",
+      "visual_prompt": "Wide shot of the same cozy Japanese living room from the beginning. Grandma is back on her zabuton cushion, the gaming setup completely out of frame or covered. She's returned to her traditional cardigan and peaceful demeanor, picking up her knitting needles and the colorful scarf from earlier. The afternoon light through the shoji screens creates the same warm, nostalgic atmosphere as the opening. She has a gentle, innocent smile as if nothing happened. The teacup and sweets are back in frame. She glances at the camera with a sweet grandmotherly expression, then looks down at her knitting with contentment. Smartphone camera returns to the original stable, warm angle from the opening shot. Perfect loop potential - could transition back to scene 1.",
+      "camera_movement": "Static wide shot, same as opening for symmetry",
+      "audio_description": "Return of soft traditional music, knitting needle sounds, peaceful ambiance",
+      "dialogue_romaji": "Sa-a, o-cha de-mo i-re-ma-sho-u-ka-ne-e. A-na-ta mo no-n-de-i-ki-ma-su-ka?",
+      "dialogue_japanese": "さぁ、お茶でも淹れましょうかねぇ。あなたも飲んでいきますか？",
+      "dialogue_english": "Well, shall I make some tea? Would you like some?",
+      "emotion": "Peaceful, innocent, grandmotherly (as if nothing happened)",
+      "text_overlay": "あなたの周りにこんな人いる？😅 #ゲーマーおばあちゃん",
+      "text_position": "bottom_third"
+    }
+  ],
+
+  "audio_strategy": {
+    "sound_design": "Mix of traditional Japanese ambiance and intense gaming sounds",
+    "music_layers": [
+      "Traditional koto music for peaceful scenes",
+      "Epic gaming/EDM music for gaming scenes",
+      "Sudden cuts between music styles for comedy effect"
+    ],
+    "voice_direction": "Natural elderly Japanese woman voice, but with intense gamer energy during gaming scenes. Contrast is key.",
+    "sfx_priorities": [
+      "Gaming sounds (gunfire, explosions, keyboard clicks)",
+      "Victory/defeat chimes",
+      "Knitting needle clicks",
+      "Tea pouring sounds"
+    ]
+  },
+
+  "hashtag_strategy": {
+    "big_tags": ["#fyp", "#おすすめ"],
+    "middle_tags": ["#ゲーマーおばあちゃん", "#ギャップ萌え", "#ApexLegends"],
+    "niche_tags": ["#口悪ゲーマー", "#おばあちゃんゲーマー", "#シニアゲーマー"]
+  },
+
+  "posting_strategy": {
+    "optimal_time": "19:00-23:00 (gamer prime time)",
+    "caption": "うちのおばあちゃん、昼は編み物、夜はApex🎮 #ゲーマーおばあちゃん #ギャップ萌え #fyp",
+    "series_potential": "Part 2: Different game genres, Part 3: Online match with grandkids"
+  },
+
+  "production_notes": {
+    "key_success_factors": [
+      "Maximum contrast between peaceful and gamer modes",
+      "Authentic gamer language and reactions",
+      "Perfect timing of scene transitions",
+      "RGB lighting for visual impact",
+      "Loop-friendly structure"
+    ],
+    "avoid": [
+      "Subtitles (remove dialogue field for VEO3)",
+      "Excessive effects that distract from core humor",
+      "Making grandma too mean (keep it playful)",
+      "Adult content triggers (gaming violence is OK if stylized)"
+    ]
+  },
+
+  "technical_specs": {
+    "camera_notes": "Smartphone POV, natural handheld quality, 9:16 vertical",
+    "lighting_progression": "Warm → RGB gaming → Warm (circular narrative)",
+    "color_grading": "Natural for peaceful scenes, saturated/cool for gaming scenes",
+    "transition_style": "Hard cuts for comedy timing, no fancy transitions needed"
+  }
+}

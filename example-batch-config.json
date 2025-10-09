@@ -1,0 +1,26 @@
+{
+  "maxConcurrency": 3,
+  "items": [
+    {
+      "type": "image",
+      "params": {
+        "prompt": "A peaceful Japanese garden with cherry blossoms, professional photography",
+        "size": "2K"
+      }
+    },
+    {
+      "type": "image",
+      "params": {
+        "prompt": "A modern gaming setup with RGB lights, cyberpunk aesthetic",
+        "size": "2K"
+      }
+    },
+    {
+      "type": "image",
+      "params": {
+        "prompt": "An elderly Japanese woman smiling warmly, portrait photography",
+        "size": "2K"
+      }
+    }
+  ]
+}

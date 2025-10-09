@@ -1,0 +1,27 @@
+{
+  "task_id": "cgt-20251009155507-v48fl",
+  "status": "succeeded",
+  "video_url": null,
+  "full_result": {
+    "id": "cgt-20251009155507-v48fl",
+    "model": "seedance-1-0-pro-250528",
+    "status": "succeeded",
+    "error": null,
+    "content": {
+      "video_url": "[Video URL available in gamer-grandma-output/videos/ directory]",
+      "last_frame_url": null
+    },
+    "usage": {
+      "completion_tokens": 246840,
+      "total_tokens": 246840
+    },
+    "created_at": 1759996507,
+    "updated_at": 1759996555,
+    "seed": 72272,
+    "revised_prompt": null,
+    "resolution": "1080p",
+    "duration": 5,
+    "ratio": "9:16",
+    "framespersecond": 24
+  }
+}

@@ -185,3 +185,9 @@ edit-images-i2i.ts
 create-video-proper.ts
 record-voice.sh
 CHARACTER_COMEDY_VIDEO_SUMMARY.md
+
+# BytePlus Video Generation Output Directories
+agent-output/
+gamer-grandma-output/
+gamer-grandma-seededit/
+promo-video-output/
