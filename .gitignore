@@ -167,3 +167,21 @@ coverage/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Video Generation Scripts and Test Output
+character-comedy-video/
+character-comedy-video-generator.ts
+grandma-video-project/
+grandma-video-generator-full.ts
+generate-grandma-video.ts
+test-video-output/
+test-video-simple.ts
+test-video-voice.ts
+test-voice-only.ts
+test-voice-upload.ts
+test-cn-region.ts
+video-with-subtitles.ts
+edit-images-i2i.ts
+create-video-proper.ts
+record-voice.sh
+CHARACTER_COMEDY_VIDEO_SUMMARY.md
